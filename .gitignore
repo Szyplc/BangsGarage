@@ -1,0 +1,37 @@
+# Logi
+logs
+*.log
+npm-debug.log*
+
+# Katalogi z zależnościami
+node_modules/
+
+# Katalogi środowiskowe IDE / edytory
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Katalogi zbudowanych plików
+/dist
+/build
+/out
+
+# Pliki środowiskowe
+#.env
+#.env.local
+#.env.development.local
+#.env.test.local
+#.env.production.local
+
+# Pliki konfiguracyjne zabezpieczeń
+#*.pem
+#*.key
+
+# Katalogi cache
+.cache/
+.tmp/
+
+# Inne pliki i katalogi
+.DS_Store
+Thumbs.db
