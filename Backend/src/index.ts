@@ -117,17 +117,15 @@ app.post('/register', async (req, res) => {
   // Tworzenie nowego użytkownika
   const newUser = new User(userData);
   // Zapisywanie użytkownika do bazy danych
-  await newUser.save()
-  .then((savedUser: any) => {
-    //console.log('Użytkownik został dodany do bazy danych:', savedUser);
-  })
+  let savedUser = await newUser.save()
   .catch((error: any) => {
     console.error('Wystąpił błąd podczas zapisywania użytkownika:', error);
   });
+
   const image_profile_picture = {
     _id: new mongoose.Types.ObjectId(),
-    user_id: userData._id,
-    url: null,
+    user_id: savedUser._id,
+    url: "https://firebasestorage.googleapis.com/v0/b/bangsgarage.appspot.com/o/config%2Fdefault_profile_image.png?alt=media&token=48953722-672d-4f36-9571-75a0c418059b",
     profile: true
   }
   const media = new Media(image_profile_picture)
@@ -168,13 +166,26 @@ app.get("/get_profile_config", async (req: any, res) => {
     const uid = req?.decodedToken.uid;
     const user = await User.findOne({ uid: uid })
     const { username, description, age, gender, _id} = user; // Pobranie pól usera
-    const profile_picture = await Media.findOne({ user_id: _id })
+    const profile_picture = await Media.findOne({ user_id: _id, profile: true })
     const { url } = profile_picture
     res.json({genderDictionary: GenderEnum, username: username, description: description, age: age, gender: gender, url: url}); // Zwraca wynik jako odpowiedź JSON
   } catch (error) {
     console.error('Wystąpił błąd:', error);
     res.status(500).json({ error: 'Wystąpił błąd podczas pobierania słownika płci' });
   }  
+})
+
+app.get("/get_profile_image", async (req: any, res) => {
+  try {
+    const uid = req?.decodedToken.uid;
+    const user = await User.findOne({ uid: uid })
+    const profile_media_object = await Media.findOne({ user_id: user._id, profile: true })
+    const { url } = profile_media_object
+    res.send(url);
+  } catch (error) {
+    console.error('Wystąpił błąd:', error);
+    res.status(500).json({ error: 'Wystąpił błąd podczas pobierania słownika płci' });
+  } 
 })
 
 app.post("/update_profile", async (req: any, res) => {

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const { User, Chat_room, Conversation, GenderDictionary, Media } = require('./schema.js');
+const { User, Chat_room, Conversation, Media, GenderEnum } = require('./schema.js');
 const mongoose_1 = __importDefault(require("mongoose"));
 const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
@@ -122,17 +122,14 @@ app.post('/register', (req, res) => __awaiter(void 0, void 0, void 0, function* 
     // Tworzenie nowego użytkownika
     const newUser = new User(userData);
     // Zapisywanie użytkownika do bazy danych
-    yield newUser.save()
-        .then((savedUser) => {
-        //console.log('Użytkownik został dodany do bazy danych:', savedUser);
-    })
+    let savedUser = yield newUser.save()
         .catch((error) => {
         console.error('Wystąpił błąd podczas zapisywania użytkownika:', error);
     });
     const image_profile_picture = {
         _id: new mongoose_1.default.Types.ObjectId(),
-        user_id: userData._id,
-        url: null,
+        user_id: savedUser._id,
+        url: "https://firebasestorage.googleapis.com/v0/b/bangsgarage.appspot.com/o/config%2Fdefault_profile_image.png?alt=media&token=48953722-672d-4f36-9571-75a0c418059b",
         profile: true
     };
     const media = new Media(image_profile_picture);
@@ -167,13 +164,25 @@ app.get("/galery", (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 }));
 app.get("/get_profile_config", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const genderDictionary = yield GenderDictionary.find({});
         const uid = req === null || req === void 0 ? void 0 : req.decodedToken.uid;
         const user = yield User.findOne({ uid: uid });
         const { username, description, age, gender, _id } = user; // Pobranie pól usera
-        const profile_picture = yield Media.findOne({ user_id: _id });
+        const profile_picture = yield Media.findOne({ user_id: _id, profile: true });
         const { url } = profile_picture;
-        res.json({ genderDictionary: genderDictionary, username: username, description: description, age: age, gender: gender, url: url }); // Zwraca wynik jako odpowiedź JSON
+        res.json({ genderDictionary: GenderEnum, username: username, description: description, age: age, gender: gender, url: url }); // Zwraca wynik jako odpowiedź JSON
+    }
+    catch (error) {
+        console.error('Wystąpił błąd:', error);
+        res.status(500).json({ error: 'Wystąpił błąd podczas pobierania słownika płci' });
+    }
+}));
+app.get("/get_profile_image", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const uid = req === null || req === void 0 ? void 0 : req.decodedToken.uid;
+        const user = yield User.findOne({ uid: uid });
+        const profile_media_object = yield Media.findOne({ user_id: user._id, profile: true });
+        const { url } = profile_media_object;
+        res.send(url);
     }
     catch (error) {
         console.error('Wystąpił błąd:', error);

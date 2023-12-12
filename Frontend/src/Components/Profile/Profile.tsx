@@ -74,12 +74,8 @@ const Profile = () => {
       })
       .then((response) => {
         const data = response.data;
-        setGender(data.gender ? data.gender : data.genderDictionary[0]);
-        var result = data.gender
-          ? data.genderDictionary.filter((obj: any) => {
-              return obj._id === data.gender;
-            })[0].name
-          : "nieokreślona";
+        setGender(data.gender ? data.gender : data.genderDictionary.MALE);
+        var result = data.genderDictionary[data.gender]
         setGender(result);
         setDescription(data.description);
         setAge(data.age);

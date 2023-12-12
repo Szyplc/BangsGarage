@@ -1,5 +1,5 @@
 import { signOut } from "firebase/auth";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { auth, storage } from "../../../base";
 import "./Configuration.css";
 import { useNavigate } from "react-router-dom";
@@ -7,70 +7,31 @@ import { AuthContext } from "../../Auth/AuthContext";
 import axios from "axios";
 
 function Configuration() {
+  const default_photo_image = "https://firebasestorage.googleapis.com/v0/b/bangsgarage.appspot.com/o/config%2Fdefault_profile_image.png?alt=media&token=48953722-672d-4f36-9571-75a0c418059b";
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
   const [genderOptions, setGenderOptions] = useState([]);
   const [description, setDescription] = useState("");
   const [profileImage, setProfileImage] = useState<any>(null);
-  const [imageUrl, setImageUrl] = useState<string>("");
-  const [oldImageUrl, setOldImageUrl] = useState<string>("");
+  const [userPhoto, setUserPhoto] = useState<string>(default_photo_image);
   const {
     user,
     signOutAuthContext,
   } = useContext(AuthContext);
   const navigate = useNavigate();
-  const handleUpload = async () => {
-    let url_photo_image;
-    if (profileImage) {
-      const storageRef = storage.ref();
-      let name = user?.uid + "/profile_image/" + profileImage.name;
-      console.log(name);
-      console.log(oldImageUrl);
-      if (oldImageUrl) {
-        const filetoDel = storage.refFromURL(oldImageUrl);
-        filetoDel
-          .delete()
-          .then(() => {})
-          .catch((error) => {
-            console.error(
-              "Wystąpił błąd podczas usuwania pliku z Firebase Storage:",
-              error
-            );
-          });
-      }
 
-      const fileRef = storageRef.child(name);
-      await fileRef.put(profileImage).then(async () => {
-        await fileRef.getDownloadURL().then((url) => {
-          url_photo_image = url;
-        });
-      });
-    }
-
-    return url_photo_image;
+  const handleUpload = async (title_new_photo: File) => {
+   //usuwanie starego
+   if(userPhoto != default_photo_image)
+    deletePhoto(userPhoto)
+   //dodawanie nowego i zwrocenie nowego url
+    let url_new_photo = await addPhoto(title_new_photo)
+    console.log(url_new_photo)
+    setUserPhoto(url_new_photo)
+    //baza danych update
   };
 
   useEffect(() => {
-    console.log(user);
-    // fetch("http://127.0.0.1:3000/get_profile_config", {
-    //   method: "GET",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     "authorization": JSON.stringify(user),
-    //   },
-    // })
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     setGenderOptions(data.genderDictionary);
-    //     setGender(data.gender ? data.gender : data.genderDictionary[0])
-    //     setDescription(data.description)
-    //     setAge(data.age)
-    //     setImageUrl(data.url)
-    //     setOldImageUrl(data.url)
-    //   })
-    //   .catch((error) => {
-    //     console.error("Wystąpił błąd:", error);
-    //   });
     axios
       .get("http://127.0.0.1:3000/get_profile_config", {
         headers: {
@@ -79,37 +40,79 @@ function Configuration() {
       })
       .then((response) => {
         const data = response.data;
-        setGenderOptions(data.genderDictionary);
+        let obj: any = Object.entries(data.genderDictionary).map(([key, value]) => ({
+          _id: key,
+          name: value
+        }));
+        setGenderOptions(obj);
         setGender(data.gender ? data.gender : data.genderDictionary[0]);
         setDescription(data.description);
         setAge(data.age);
-        setImageUrl(data.url);
-        setOldImageUrl(data.url);
+        setUserPhoto(data.url);
       })
       .catch((error) => {
         console.error("Wystąpił błąd:", error);
       });
+
+      axios.get("http://127.0.0.1:3000/get_profile_image", {
+        headers: {
+          "Content-Type": "application/json",
+        }}).then((res: any) => {
+          setUserPhoto(res.data)
+        })
   }, []);
 
   const handleProfileImageChange = (e: any) => {
     const file = e.target.files[0];
     setProfileImage(file);
+    console.log(file)
     //setOldImageUrl(imageUrl);
     const reader = new FileReader();
     reader.onload = () => {
-      if (typeof reader?.result == "string") setImageUrl(reader.result);
+      if (typeof reader?.result == "string") handleUpload(file);
     };
     reader.readAsDataURL(file);
   };
+  
+  const deletePhoto = (url: string) => {
+    if(url != default_photo_image)
+    {
+      const filetoDel = storage.refFromURL(url);
+      filetoDel
+        .delete()
+        .then(() => {})
+        .catch((error) => {
+          console.error(
+            "Wystąpił błąd podczas usuwania pliku z Firebase Storage:",
+            error
+          );
+        });
+    }
+  }
+
+  const addPhoto = async (file: File): Promise<string> => {
+    try 
+    {
+      const storageRef = storage.ref();
+      let name = user?.uid + "/profile_image/" + file.name;
+      const fileRef = storageRef.child(name);
+      await fileRef.put(file)
+      const url = await fileRef.getDownloadURL()
+      return url
+    }
+    catch (err) {
+      throw new Error("Nie udulo sie przeslac zdjecia")
+    }
+  }
 
   const updateProfile = async (e: any) => {
     e.preventDefault();
-    let url_photo_image = await handleUpload();
+    
     const user_database = {
       age: age || "",
       gender: gender || "",
       description: description || "",
-      url_photo_image: url_photo_image,
+      url_photo_image: userPhoto,
     };
     axios
       .post("http://127.0.0.1:3000/update_profile", user_database, {
@@ -124,22 +127,6 @@ function Configuration() {
       .catch((error) => {
         console.error("Wystąpił błąd:", error);
       });
-    // fetch("http://127.0.0.1:3000/update_profile", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     "authorization": JSON.stringify(user),
-    //   },
-    //   body: JSON.stringify(user_database),
-    // })
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     console.log(data)
-    //     // Przetwarzanie odpowiedzi od serwera po zaktualizowaniu profilu
-    //   })
-    //   .catch((error) => {
-    //     console.error("Wystąpił błąd:", error);
-    //   });
     navigate("/slajder");
   };
 
@@ -152,6 +139,12 @@ function Configuration() {
     }
     navigate("/");
   };
+
+  const DeleteProfilePicture = () => {
+    deletePhoto(userPhoto);
+    setUserPhoto(default_photo_image);
+    setProfileImage("")
+  }
 
   return (
     <div className="sign-Up-container">
@@ -197,8 +190,8 @@ function Configuration() {
           accept="image/*"
           onChange={handleProfileImageChange}
         />
-        <img src={imageUrl} alt="Zdjęcie" className="profile_photo" />
-
+        <img src={userPhoto} alt="Zdjęcie" className="profile_photo" />
+        <div onClick={DeleteProfilePicture}>Usun zdjęcie profilowe</div>
         <button type="submit" className="register-button">
           CONFIGURATION
         </button>

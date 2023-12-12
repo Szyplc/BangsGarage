@@ -4,51 +4,71 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
+const GenderEnum = {
+    MALE: 'male',
+    FEMALE: 'female',
+    NON_BINARY: 'non-binary',
+    OTHER: 'other'
+};
 const User_schema = new mongoose_1.default.Schema({
     _id: mongoose_1.default.Schema.Types.ObjectId,
-    uid: { type: String },
+    uid: { type: String, required: true, unique: true },
     username: { type: String, required: true, unique: true },
-    email: { type: String, required: true, unique: true },
-    media_id: { type: [mongoose_1.default.Schema.Types.ObjectId], ref: 'Media' },
+    email: { type: String, required: true, unique: true, match: /.+\@.+\..+/ },
     description: { type: String },
-    account_type: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Account_type' },
     age: { type: Number },
-    expirationAccount: { type: Date, default: new Date().setFullYear(new Date().getFullYear() + 3) },
-    Elo: { type: Number },
     localization: { type: [Number] },
     connection_id: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Connections' },
-    likes_id: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Likes' },
     connversation_id: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Conversations' },
-    gender: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'GenderDictionary' },
-    gender_search: {},
-    profile_photo: { type: String },
-});
-const gender_schema = new mongoose_1.default.Schema({
-    code: { type: String },
-    name: { type: String }
-});
-const GenderDictionary = mongoose_1.default.model('GenderDictionary', gender_schema);
-/*const male = { code: 'M', name: 'Mężczyzna' };
-const female = { code: 'F', name: 'Kobieta' };
-const notDefined = { code: 'N', name: 'Nieokreślona' }
-const Male = new GenderDictionary(male);
-const Female = new GenderDictionary(female);
-const NotDefined = new GenderDictionary(notDefined);
-Male.save();
-Female.save();
-NotDefined.save();*/
+    gender: { type: String, enum: Object.values(GenderEnum) },
+    profile_photo: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "Media" },
+    cars_id: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: "Cars" }]
+}, { timestamps: true });
+const Cars = new mongoose_1.default.Schema({
+    _id: mongoose_1.default.Schema.Types.ObjectId,
+    user_id: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "User" },
+    Car_Specification: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "Car_Specification" },
+    likes_count: { type: Number, default: 0 },
+    views: { type: Number, default: 0 }
+}, { timestamps: true });
+//Specifykacja auta silnik rocznik liczba drzwi itp. 
+const Car_Specification = new mongoose_1.default.Schema({
+    _id: mongoose_1.default.Schema.Types.ObjectId,
+    brand: { type: String, required: true },
+    model: { type: String, required: true },
+    year: { type: Number, required: true },
+    //na razie tyle
+}, { timestamps: true });
+//Media jako pojedyncze zdjęcie możliwośc korzystania w poście od auta jako zdjęcie profilowe użytkownika
+const Media_schema = new mongoose_1.default.Schema({
+    _id: mongoose_1.default.Schema.Types.ObjectId,
+    url: { type: String, required: true },
+    views: { type: Number },
+    //gdy profile false
+    car_id: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "Car" },
+    //Gdy jest to zdjęcie profillowe user id nie jest null i profile true
+    user_id: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "User" },
+    profile: { type: Boolean },
+    title: { type: String },
+}, { timestamps: true });
 const Likes = new mongoose_1.default.Schema({
     id: mongoose_1.default.Schema.Types.ObjectId,
     user_liked_id: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'User' },
-    user_likeing_id: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'User' },
+    car_likeing: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Car' },
     like_type_id: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Likes_type' },
     date_time: { type: Date, default: Date.now },
-    interaction_time: { type: Number } //
-});
+}, { timestamps: true });
 const Like_type = new mongoose_1.default.Schema({
-    id: mongoose_1.default.Schema.Types.ObjectId,
+    _id: mongoose_1.default.Schema.Types.ObjectId,
     name: { type: String }
-});
+}, { timestamps: true });
+const Comment = new mongoose_1.default.Schema({
+    _id: mongoose_1.default.Schema.Types.ObjectId,
+    user_comment: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "User" },
+    car_commented: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "Car" },
+    content: { type: String, required: true }
+}, { timestamps: true });
+//na później/////////////////////////////
 const Connections = new mongoose_1.default.Schema({
     id: mongoose_1.default.Schema.Types.ObjectId,
     user_id: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'User' },
@@ -59,16 +79,6 @@ const Account_type = new mongoose_1.default.Schema({
     id: mongoose_1.default.Schema.Types.ObjectId,
     name: { type: String },
     price: { type: Number },
-});
-const Media_schema = new mongoose_1.default.Schema({
-    _id: mongoose_1.default.Schema.Types.ObjectId,
-    url: { type: String },
-    timeSpent: {}, //
-    interaction: {}, //
-    views: { type: Number },
-    user_id: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'User' },
-    profile: { type: Boolean },
-    title: { type: String }
 });
 const Chat_room_schema = new mongoose_1.default.Schema({
     _id: mongoose_1.default.Schema.Types.ObjectId,
@@ -88,4 +98,4 @@ const User = mongoose_1.default.model('User', User_schema);
 const Chat_room = mongoose_1.default.model('ChatRoom', Chat_room_schema);
 const Conversation = mongoose_1.default.model('Conversation', Conversation_schema);
 const Media = mongoose_1.default.model('Media', Media_schema);
-module.exports = { User, Chat_room, Conversation, GenderDictionary, Media /*, Media, Account_type, Connections, Like_type, Likes*/ };
+module.exports = { User, Chat_room, Conversation, Media, GenderEnum /*, Media, Account_type, Connections, Like_type, Likes*/ };

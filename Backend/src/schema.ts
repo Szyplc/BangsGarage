@@ -18,7 +18,7 @@ const User_schema = new mongoose.Schema({
   
   connection_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Connections' },
   connversation_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Conversations' },
-  gender: { type: String, enum: Object.values(GenderEnum), required: true },
+  gender: { type: String, enum: Object.values(GenderEnum) },
   profile_photo: { type : mongoose.Schema.Types.ObjectId, ref: "Media" },
   cars_id: [{ type: mongoose.Schema.Types.ObjectId, ref: "Cars" }]
 }, { timestamps: true });
@@ -43,6 +43,10 @@ const Media_schema = new mongoose.Schema({
   _id: mongoose.Schema.Types.ObjectId,
   url: { type: String, required: true },
   views: {type: Number },
+  //gdy profile false
+  car_id: { type: mongoose.Schema.Types.ObjectId, ref: "Car" },
+  //Gdy jest to zdjęcie profillowe user id nie jest null i profile true
+  user_id: { type: mongoose.Schema.Types.ObjectId, ref: "User"},
   profile: { type: Boolean },
   title: { type: String },
 }, { timestamps: true })
