@@ -11,8 +11,10 @@ import AddPhotoToProfileGallery from "./AddPhotoToGallery/AddPhotoToProfileGalle
 import { ref, deleteObject } from "firebase/storage";
 import { storage } from "../../base";
 import axios from "axios";
+import { AuthContext } from "../Auth/AuthContext";
 
 const Profile = () => {
+  const { user } = useContext(AuthContext);
   const location = useLocation();
   const isYourProfile = location.state?.isYourProfile;
   const [photos, setPhotos] = useState([]);
@@ -67,7 +69,7 @@ const Profile = () => {
 
   useEffect(() => {
     axios
-      .get("http://127.0.0.1:3000/get_profile_config", {
+      .get("http://127.0.0.1:3000/user", {
         headers: {
           "Content-Type": "application/json",
         },
@@ -75,8 +77,6 @@ const Profile = () => {
       .then((response) => {
         const data = response.data;
         setGender(data.gender ? data.gender : data.genderDictionary.MALE);
-        var result = data.genderDictionary[data.gender]
-        setGender(result);
         setDescription(data.description);
         setAge(data.age);
         setImageUrl(data.url);
@@ -159,9 +159,9 @@ const Profile = () => {
         <></>
       )}
       <AddPhotoToProfileGallery
-        getPhotos={get_photos}
-        setPhotos={setPhotos}
-        photos={photos}
+        afterSend={get_photos}
+        addingMenuProp={true}
+        filePath={user?.uid + "/gallery/"}
       ></AddPhotoToProfileGallery>
       <Gallery photos={photos} DeletePhoto={DeletePhoto} />
     </div>

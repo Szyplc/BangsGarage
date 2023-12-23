@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const { User, Chat_room, Conversation, Media, GenderEnum } = require('./schema.js');
+const { User, Chat_room, Conversation, Media, GenderEnum, Car, Car_Specification } = require('./schema.js');
 const mongoose_1 = __importDefault(require("mongoose"));
 const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
@@ -118,7 +118,6 @@ app.post('/register', (req, res) => __awaiter(void 0, void 0, void 0, function* 
         uid: req.body.userCredential.user.uid,
         localization: req.body.localization
     };
-    console.log(req.body.localization);
     // Tworzenie nowego użytkownika
     const newUser = new User(userData);
     // Zapisywanie użytkownika do bazy danych
@@ -162,7 +161,7 @@ app.get("/galery", (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     });
     res.json(JSON.stringify(urls));
 }));
-app.get("/get_profile_config", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get("/user", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const uid = req === null || req === void 0 ? void 0 : req.decodedToken.uid;
         const user = yield User.findOne({ uid: uid });
@@ -176,7 +175,7 @@ app.get("/get_profile_config", (req, res) => __awaiter(void 0, void 0, void 0, f
         res.status(500).json({ error: 'Wystąpił błąd podczas pobierania słownika płci' });
     }
 }));
-app.get("/get_profile_image", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get("/profile_image", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const uid = req === null || req === void 0 ? void 0 : req.decodedToken.uid;
         const user = yield User.findOne({ uid: uid });
@@ -285,6 +284,90 @@ app.post('/userzy', (req, res) => {
         res.status(500).send('Wystąpił błąd podczas pobierania danych');
     });
 });
+app.post("/create_car", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const car_specification = new Car_Specification({
+            _id: new mongoose_1.default.Types.ObjectId(),
+            manufacturer: "creating",
+            model: "creating",
+            year: 0
+        });
+        const saved_Car_Specyfication = yield car_specification.save();
+        const car_specification_Id = saved_Car_Specyfication._id;
+        console.log(car_specification_Id);
+        //Znajdujemy usera
+        const user = yield User.findOne({ uid: req.decodedToken.user_id });
+        const { _id } = user;
+        //Wstawiamy objekt car do bazy
+        const newCarEntry = new Car({
+            _id: new mongoose_1.default.Types.ObjectId(),
+            user_id: _id,
+            Car_Specification: car_specification_Id,
+            likes_count: 0,
+            views: 0,
+            //meida jako pojedyncze zdjęcie profilowe(główne) auta
+        });
+        yield newCarEntry.save();
+        res.send(newCarEntry._id);
+    }
+    catch (error) {
+        console.error("Wystapil blad", error);
+        res.send(error);
+    }
+}));
+app.put("/update_car", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { manufacturer, model, year, engineInfo, version, image, mileage, carId } = req.body;
+    console.log(carId);
+    //mamy carId teraz musimy miec id ale car_spec
+    const car = yield Car.findOne({ _id: carId });
+    const car_spec_id = car.Car_Specification;
+    console.log(car_spec_id);
+    //car { user_id - do jakiego nalezy,  Car_Specification - o aucie, likes_count - ile malajkow, views  - ile objerzało, 
+    //media_id - link do zdjec w fireabse uid-uzytkownika/id_auta/_id_zdjecia
+    //tworzymy objekt car_specyfication
+    try {
+        const updateData = {};
+        if (manufacturer !== undefined)
+            updateData.manufacturer = manufacturer;
+        if (model !== undefined)
+            updateData.model = model;
+        if (year !== undefined)
+            updateData.year = year;
+        if (engineInfo !== undefined)
+            updateData.engineInfo = engineInfo;
+        if (version !== undefined)
+            updateData.version = version;
+        if (image !== undefined)
+            updateData.image = image;
+        if (mileage !== undefined)
+            updateData.mileage = mileage;
+        console.log(updateData);
+        const updateCar = yield Car_Specification.findByIdAndUpdate(car_spec_id, updateData, { new: true });
+    }
+    catch (error) {
+        console.error("Wystapil blad", error);
+    }
+    res.json({ "status": "OK" });
+}));
+app.put("/updateCarProfileImage", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { image, carId } = req.body;
+    console.log("update ", image, carId);
+    const car = yield Car.findOne({ _id: carId });
+    const car_spec_id = car.Car_Specification;
+    const newMedia = new Media({
+        _id: new mongoose_1.default.Types.ObjectId(),
+        url: image,
+        views: 0,
+        car_id: carId,
+        profile: true,
+    });
+    let media = yield newMedia.save();
+    console.log(media._id);
+    yield Car.findByIdAndUpdate(carId, { media_id: media._id });
+}));
+app.get("/getUserCars", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    res.json({ "cars": "yes" });
+}));
 app.listen(3000, () => {
     console.log('Serwer nasłuchuje na porcie 3000');
 });

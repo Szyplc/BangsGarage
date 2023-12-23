@@ -1,5 +1,5 @@
-const { User, Chat_room, Conversation, Media, GenderEnum } = require('./schema.js');
-import mongoose from 'mongoose';
+const { User, Chat_room, Conversation, Media, GenderEnum, Car, Car_Specification } = require('./schema.js');
+import mongoose, { mongo } from 'mongoose';
 import cors from "cors"
 import { MongoClient, ObjectId } from 'mongodb';
 import express from 'express';
@@ -113,7 +113,6 @@ app.post('/register', async (req, res) => {
     uid: req.body.userCredential.user.uid,
     localization: req.body.localization
   };
-  console.log(req.body.localization)
   // Tworzenie nowego użytkownika
   const newUser = new User(userData);
   // Zapisywanie użytkownika do bazy danych
@@ -161,7 +160,7 @@ app.get("/galery", async (req: any, res) => {
   res.json(JSON.stringify(urls))
 })
 
-app.get("/get_profile_config", async (req: any, res) => {
+app.get("/user", async (req: any, res) => {
   try {
     const uid = req?.decodedToken.uid;
     const user = await User.findOne({ uid: uid })
@@ -175,7 +174,7 @@ app.get("/get_profile_config", async (req: any, res) => {
   }  
 })
 
-app.get("/get_profile_image", async (req: any, res) => {
+app.get("/profile_image", async (req: any, res) => {
   try {
     const uid = req?.decodedToken.uid;
     const user = await User.findOne({ uid: uid })
@@ -293,6 +292,100 @@ app.post('/userzy', (req, res) => {
       res.status(500).send('Wystąpił błąd podczas pobierania danych');
     });
 });
+
+app.post("/create_car", async (req: any, res) => {
+  try {
+    const car_specification = new Car_Specification({
+      _id: new mongoose.Types.ObjectId(),
+      manufacturer: "creating",
+      model: "creating",
+      year: 0
+    })
+    const saved_Car_Specyfication = await car_specification.save();
+    const car_specification_Id = saved_Car_Specyfication._id;
+    console.log(car_specification_Id)
+    //Znajdujemy usera
+    const user = await User.findOne({ uid: req.decodedToken.user_id })
+    const { _id } = user
+
+  //Wstawiamy objekt car do bazy
+    const newCarEntry = new Car({
+      _id: new mongoose.Types.ObjectId(),
+      user_id: _id,
+      Car_Specification: car_specification_Id,
+      likes_count: 0,
+      views: 0,
+      //meida jako pojedyncze zdjęcie profilowe(główne) auta
+    })
+    await newCarEntry.save()
+    res.send(newCarEntry._id)
+  } catch(error) {
+    console.error("Wystapil blad", error)
+    res.send(error)
+  }
+})
+
+app.put("/update_car", async (req: any, res) => {
+  const {
+    manufacturer,
+    model,
+    year,
+    engineInfo,
+    version,
+    image,
+    mileage,
+    carId
+} = req.body;
+  console.log(carId)
+  //mamy carId teraz musimy miec id ale car_spec
+  const car = await Car.findOne({ _id: carId })
+  const car_spec_id = car.Car_Specification;
+  console.log(car_spec_id)
+
+  //car { user_id - do jakiego nalezy,  Car_Specification - o aucie, likes_count - ile malajkow, views  - ile objerzało, 
+  //media_id - link do zdjec w fireabse uid-uzytkownika/id_auta/_id_zdjecia
+
+  //tworzymy objekt car_specyfication
+  try {
+    const updateData: any = {};
+    if (manufacturer !== undefined) updateData.manufacturer = manufacturer;
+    if (model !== undefined) updateData.model = model;
+    if (year !== undefined) updateData.year = year;
+    if (engineInfo !== undefined) updateData.engineInfo = engineInfo;
+    if (version !== undefined) updateData.version = version;
+    if (image !== undefined) updateData.image = image;
+    if (mileage !== undefined) updateData.mileage = mileage;
+    console.log(updateData)
+    const updateCar = await Car_Specification.findByIdAndUpdate(car_spec_id, updateData, { new: true });
+  } catch(error) {
+    console.error("Wystapil blad", error)
+  }
+  res.json({"status": "OK"})
+})
+
+app.put("/updateCarProfileImage", async (req, res) => {
+  const {
+    image,
+    carId
+} = req.body;
+console.log("update ", image, carId)
+  const car = await Car.findOne({ _id: carId })
+  const car_spec_id = car.Car_Specification;
+  const newMedia = new Media({
+    _id: new mongoose.Types.ObjectId(),
+    url: image,
+    views: 0,
+    car_id: carId,
+    profile: true,
+  })
+  let media = await newMedia.save()
+  console.log(media._id)
+  await Car.findByIdAndUpdate(carId, { media_id: media._id })
+})
+
+app.get("/getUserCars", async (req, res) => {
+  res.json({"cars": "yes"})
+})
 
 app.listen(3000, () => {
   console.log('Serwer nasłuchuje na porcie 3000');

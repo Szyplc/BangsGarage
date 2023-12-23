@@ -1,7 +1,7 @@
 import { User, getIdTokenResult, onAuthStateChanged } from "firebase/auth";
 import React, { createContext, useEffect, useState } from "react";
 import { auth } from "../../base";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 interface AuthContextProps {
     isAuthenticated: boolean | null;
@@ -11,6 +11,8 @@ interface AuthContextProps {
     getToken: (userCredential: User | undefined) => Promise<string | undefined>;
     signIn: (currentUser: User) => void;
     signOutAuthContext: () => void;
+    cars_id: string[];
+    setCars_id: (value: string[]) => void;
   }
   
   export const AuthContext = createContext<AuthContextProps>({
@@ -20,13 +22,16 @@ interface AuthContextProps {
     setUser: () => {},
     getToken: () => { return new Promise((resolve) => resolve("")) },
     signIn: (currentUser: User) => {},
-    signOutAuthContext: () => {}
+    signOutAuthContext: () => {},
+    cars_id: [],
+    setCars_id: () => {}
   });
   
   
   export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
     const [user, setUser] = useState<User | null>(null);
+    const [cars_id, setCars_id] = useState<string[]>([]);
   
     useEffect(() => {
       let unsubscribe: (() => void) | undefined;
@@ -83,9 +88,21 @@ interface AuthContextProps {
       setUser(null);
       delete axios.defaults.headers.common['Authorization'];
     }
+
+    const getCarsId = async () => {
+      //uzyc endpointa do ktorego damy useruid i pozbieramy wszystkie cars ktore maja id usera
+      axios.put("http://127.0.0.1:3000/updateCarProfileImage", { user: user }, {
+            headers: {
+              "Content-Type": "application/json",
+            }
+          })
+          .catch((error: AxiosError) => {
+            console.error("Wystąpił błąd:", error);
+          })
+    }
   
     return (
-      <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, user, setUser, getToken, signIn, signOutAuthContext }}>
+      <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, user, setUser, getToken, signIn, signOutAuthContext, cars_id, setCars_id }}>
         {children}
       </AuthContext.Provider>
     );

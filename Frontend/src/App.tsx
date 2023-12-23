@@ -17,6 +17,8 @@ import Index from "./Index";
 import Configuration from "./Components/Profile/Configuration/Configuration";
 import Login from "./Components/Auth/Login";
 import { AuthContext } from "./Components/Auth/AuthContext";
+import CarCreator from "./Components/Car/CarCreator";
+import UserCar from "./Components/Car/UserCar";
 
 export const DoubleClickEvent = createContext<{
   heartColor: string;
@@ -48,6 +50,8 @@ const App: React.FC = () => {
                   <Route path="/menuSurveys" element={<MenuSurveys />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/configuration" element={<Configuration />} />
+                  <Route path="/carConfig" element={<CarCreator />} />
+                  <Route path="/userCar" element={<UserCar />} />
                 </>}
               <Route path="*" element={<Index />} />
             </Routes>

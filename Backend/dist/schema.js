@@ -24,19 +24,23 @@ const User_schema = new mongoose_1.default.Schema({
     profile_photo: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "Media" },
     cars_id: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: "Cars" }]
 }, { timestamps: true });
-const Cars = new mongoose_1.default.Schema({
+const Car_schema = new mongoose_1.default.Schema({
     _id: mongoose_1.default.Schema.Types.ObjectId,
     user_id: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "User" },
     Car_Specification: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "Car_Specification" },
     likes_count: { type: Number, default: 0 },
-    views: { type: Number, default: 0 }
+    views: { type: Number, default: 0 },
+    media_id: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "Media" }
 }, { timestamps: true });
 //Specifykacja auta silnik rocznik liczba drzwi itp. 
-const Car_Specification = new mongoose_1.default.Schema({
+const Car_Specification_schema = new mongoose_1.default.Schema({
     _id: mongoose_1.default.Schema.Types.ObjectId,
-    brand: { type: String, required: true },
+    manufacturer: { type: String, required: true },
     model: { type: String, required: true },
     year: { type: Number, required: true },
+    engineInfo: { type: String, required: false },
+    version: { type: String, required: false },
+    milage: { type: Number, required: false }
     //na razie tyle
 }, { timestamps: true });
 //Media jako pojedyncze zdjęcie możliwośc korzystania w poście od auta jako zdjęcie profilowe użytkownika
@@ -98,4 +102,6 @@ const User = mongoose_1.default.model('User', User_schema);
 const Chat_room = mongoose_1.default.model('ChatRoom', Chat_room_schema);
 const Conversation = mongoose_1.default.model('Conversation', Conversation_schema);
 const Media = mongoose_1.default.model('Media', Media_schema);
-module.exports = { User, Chat_room, Conversation, Media, GenderEnum /*, Media, Account_type, Connections, Like_type, Likes*/ };
+const Car = mongoose_1.default.model("Car", Car_schema);
+const Car_Specification = mongoose_1.default.model("Car_Specification", Car_Specification_schema);
+module.exports = { User, Chat_room, Conversation, Media, GenderEnum, Car, Car_Specification /*, Media, Account_type, Connections, Like_type, Likes*/ };

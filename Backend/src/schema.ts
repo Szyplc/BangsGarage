@@ -23,19 +23,24 @@ const User_schema = new mongoose.Schema({
   cars_id: [{ type: mongoose.Schema.Types.ObjectId, ref: "Cars" }]
 }, { timestamps: true });
 
-const Cars = new mongoose.Schema({
+const Car_schema = new mongoose.Schema({
   _id: mongoose.Schema.Types.ObjectId,
   user_id: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, 
   Car_Specification: { type: mongoose.Schema.Types.ObjectId, ref: "Car_Specification" },
   likes_count: { type: Number, default: 0 },
-  views: { type: Number, default: 0 }
+  views: { type: Number, default: 0 },
+  media_id: { type: mongoose.Schema.Types.ObjectId, ref: "Media"}
 }, { timestamps: true });
+
 //Specifykacja auta silnik rocznik liczba drzwi itp. 
-const Car_Specification = new mongoose.Schema({
+const Car_Specification_schema = new mongoose.Schema({
   _id: mongoose.Schema.Types.ObjectId,
-  brand: { type: String, required: true },
+  manufacturer: { type: String, required: true },
   model: { type: String, required: true },
   year: { type: Number, required: true },
+  engineInfo: { type: String, required: false },
+  version: { type: String, required: false },
+  milage: { type: Number, required: false}
   //na razie tyle
 }, { timestamps: true })
 //Media jako pojedyncze zdjęcie możliwośc korzystania w poście od auta jako zdjęcie profilowe użytkownika
@@ -104,5 +109,7 @@ const User = mongoose.model('User', User_schema);
 const Chat_room = mongoose.model('ChatRoom', Chat_room_schema);
 const Conversation = mongoose.model('Conversation', Conversation_schema);
 const Media = mongoose.model('Media', Media_schema)
+const Car = mongoose.model("Car", Car_schema)
+const Car_Specification = mongoose.model("Car_Specification", Car_Specification_schema)
 
-module.exports = { User, Chat_room, Conversation, Media, GenderEnum/*, Media, Account_type, Connections, Like_type, Likes*/ };
+module.exports = { User, Chat_room, Conversation, Media, GenderEnum, Car, Car_Specification/*, Media, Account_type, Connections, Like_type, Likes*/ };

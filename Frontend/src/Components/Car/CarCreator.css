@@ -1,0 +1,11 @@
+body {
+    height: 100vh;   
+}
+
+#container {
+    overflow-y: scroll;
+    position: absolute;
+    top: 0;
+    width: 100vw;
+    height: 94vh;
+}
