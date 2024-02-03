@@ -30,7 +30,7 @@ const Car_schema = new mongoose_1.default.Schema({
     Car_Specification: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "Car_Specification" },
     likes_count: { type: Number, default: 0 },
     views: { type: Number, default: 0 },
-    media_id: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "Media" }
+    media: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: "Media" }]
 }, { timestamps: true });
 //Specifykacja auta silnik rocznik liczba drzwi itp. 
 const Car_Specification_schema = new mongoose_1.default.Schema({

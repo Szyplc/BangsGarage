@@ -2,7 +2,7 @@ import React from "react";
 import { useStyles } from "./MessagesStyle";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Avatar } from "@mui/material";
-import "swiper/swiper.min.css";
+//import "swiper/swiper.min.css";
 import { Link } from "react-router-dom";
 
 const Messages: React.FC = () => {

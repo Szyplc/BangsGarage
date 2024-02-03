@@ -62,7 +62,7 @@ export const useStyles = makeStyles(() => ({
     padding: "3px",
   },
   containerStyle: {
-    position: "fixed",
+    //position: "fixed",
     left: "-0.1%",
     top: "42%",
     display: "flex",

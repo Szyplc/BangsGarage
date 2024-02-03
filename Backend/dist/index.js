@@ -69,7 +69,6 @@ const firebaseAuthMiddleware = (req, res, next) => __awaiter(void 0, void 0, voi
             }
             // Zweryfikuj token uwierzytelniający za pomocą Firebase
             const decodedToken = yield firebase_admin_1.default.auth().verifyIdToken(authToken);
-            console.log("Zalogowano jako: ", decodedToken.uid);
             req.decodedToken = decodedToken; // Dodaj użytkownika do obiektu żądania
             next(); // Przejdź do następnego middleware lub obsługi żądania
         }
@@ -132,13 +131,11 @@ app.post('/register', (req, res) => __awaiter(void 0, void 0, void 0, function* 
         profile: true
     };
     const media = new Media(image_profile_picture);
-    media.save()
-        .then((savedMedia) => {
-        //console.log('Zdjecie dodane do bazy danych:', savedMedia);
-    })
+    let savedMedia = yield media.save()
         .catch((error) => {
         console.error('Wystąpił błąd podczas zapisywania użytkownika:', error);
     });
+    yield User.updateOne({ uid: req.body.userCredential.user.uid }, { $set: { profile_photo: savedMedia._id } });
     res.send({ "status": "OK" });
 }));
 app.get("/galery", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -323,7 +320,7 @@ app.put("/update_car", (req, res) => __awaiter(void 0, void 0, void 0, function*
     const car_spec_id = car.Car_Specification;
     console.log(car_spec_id);
     //car { user_id - do jakiego nalezy,  Car_Specification - o aucie, likes_count - ile malajkow, views  - ile objerzało, 
-    //media_id - link do zdjec w fireabse uid-uzytkownika/id_auta/_id_zdjecia
+    //media - link do zdjec w fireabse uid-uzytkownika/id_auta/_id_zdjecia
     //tworzymy objekt car_specyfication
     try {
         const updateData = {};
@@ -349,8 +346,8 @@ app.put("/update_car", (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
     res.json({ "status": "OK" });
 }));
-app.put("/updateCarProfileImage", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { image, carId } = req.body;
+app.put("/updateCarMedia", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { image, carId, profile } = req.body;
     console.log("update ", image, carId);
     const car = yield Car.findOne({ _id: carId });
     const car_spec_id = car.Car_Specification;
@@ -359,14 +356,33 @@ app.put("/updateCarProfileImage", (req, res) => __awaiter(void 0, void 0, void 0
         url: image,
         views: 0,
         car_id: carId,
-        profile: true,
+        profile: profile,
     });
     let media = yield newMedia.save();
     console.log(media._id);
-    yield Car.findByIdAndUpdate(carId, { media_id: media._id });
+    car.media.push(media._id);
+    yield Car.findByIdAndUpdate(carId, { media: car.media });
+    res.send(yield Car.findOne({ _id: carId }).populate('Car_Specification').populate('media'));
 }));
 app.get("/getUserCars", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    res.json({ "cars": "yes" });
+    const user = req.decodedToken;
+    const user_db = yield User.findOne({ uid: user.user_id });
+    const cars = yield Car.find({
+        user_id: user_db._id
+    })
+        .populate({
+        path: "Car_Specification",
+        match: { manufacturer: { $ne: 'creating' } }
+    })
+        .sort({ createdAd: 1 });
+    const filteredCars = cars.filter(car => car.Car_Specification);
+    const carIds = filteredCars.map(car => car._id);
+    res.send(carIds);
+}));
+app.get("/getCarData", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { car_id } = req.query;
+    const car = yield Car.findOne({ _id: car_id }).populate('Car_Specification').populate('media');
+    res.send(car);
 }));
 app.listen(3000, () => {
     console.log('Serwer nasłuchuje na porcie 3000');

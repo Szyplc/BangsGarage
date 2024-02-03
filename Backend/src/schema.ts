@@ -29,7 +29,7 @@ const Car_schema = new mongoose.Schema({
   Car_Specification: { type: mongoose.Schema.Types.ObjectId, ref: "Car_Specification" },
   likes_count: { type: Number, default: 0 },
   views: { type: Number, default: 0 },
-  media_id: { type: mongoose.Schema.Types.ObjectId, ref: "Media"}
+  media: [{ type: mongoose.Schema.Types.ObjectId, ref: "Media"}]
 }, { timestamps: true });
 
 //Specifykacja auta silnik rocznik liczba drzwi itp. 

@@ -3,6 +3,7 @@ import { getAuth } from 'firebase/auth';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/storage';
 import 'firebase/compat/firestore';
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCs-RZVFpzaVgUmq2t58iMCgPW3qHqZkrU",
@@ -21,4 +22,10 @@ const auth = getAuth(app);
 const db = firebase.firestore();
 const firestore = firebase.firestore();
 
-export { storage, firebase, inicialize, db, firestore, auth }
+const convertUrlToFullUrl = async (url: string) => {
+  const storage = getStorage();
+  const pathReference = ref(storage, url);
+  return getDownloadURL(pathReference)
+}
+
+export { storage, firebase, inicialize, db, firestore, auth, convertUrlToFullUrl }

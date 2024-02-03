@@ -1,15 +1,14 @@
-.menu-container {
-    position: fixed;
-    bottom: 0;
+/* .menu-container {
+    position: relative;
     width: 100vw;
     display: flex;
     justify-content: space-around;
     background-color: #f2f2f2;
     padding: 10px;
-    z-index: 999; /* Ustaw z-index na odpowiednią wartość, aby menu było na wierzchu innych elementów */
+    z-index: 999; 
   }
   
   .menu-button {
     margin: 0 10px;
   }
-  
+   */

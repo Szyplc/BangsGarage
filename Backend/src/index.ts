@@ -9,6 +9,7 @@ import { initializeApp } from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 import admin from 'firebase-admin';
+import { User } from 'firebase/auth';
 const serviceAccount = require('./bangsgarage-firebase-adminsdk-o8ms7-ad6dd68035.json');
 
 const uri = 'mongodb+srv://generalkenobi1919:X3AdbUJMjhaCI8RN@cluster0.zcokpld.mongodb.net/Praktyki';
@@ -61,7 +62,6 @@ const firebaseAuthMiddleware = async (req: any, res: any, next: any) => {
       }
       // Zweryfikuj token uwierzytelniający za pomocą Firebase
       const decodedToken = await admin.auth().verifyIdToken(authToken)
-      console.log("Zalogowano jako: ", decodedToken.uid)
       req.decodedToken = decodedToken; // Dodaj użytkownika do obiektu żądania
       next(); // Przejdź do następnego middleware lub obsługi żądania
     } catch (error) {
@@ -128,13 +128,13 @@ app.post('/register', async (req, res) => {
     profile: true
   }
   const media = new Media(image_profile_picture)
-  media.save()
-  .then((savedMedia: any) => {
-    //console.log('Zdjecie dodane do bazy danych:', savedMedia);
-  })
+  let savedMedia = await media.save()
   .catch((error: any) => {
     console.error('Wystąpił błąd podczas zapisywania użytkownika:', error);
   });
+  
+  await User.updateOne({ uid: req.body.userCredential.user.uid }, { $set: { profile_photo: savedMedia._id }})
+  
   res.send({"status": "OK"});  
 })
 
@@ -343,7 +343,7 @@ app.put("/update_car", async (req: any, res) => {
   console.log(car_spec_id)
 
   //car { user_id - do jakiego nalezy,  Car_Specification - o aucie, likes_count - ile malajkow, views  - ile objerzało, 
-  //media_id - link do zdjec w fireabse uid-uzytkownika/id_auta/_id_zdjecia
+  //media - link do zdjec w fireabse uid-uzytkownika/id_auta/_id_zdjecia
 
   //tworzymy objekt car_specyfication
   try {
@@ -363,10 +363,11 @@ app.put("/update_car", async (req: any, res) => {
   res.json({"status": "OK"})
 })
 
-app.put("/updateCarProfileImage", async (req, res) => {
+app.put("/updateCarMedia", async (req, res) => {
   const {
     image,
-    carId
+    carId,
+    profile
 } = req.body;
 console.log("update ", image, carId)
   const car = await Car.findOne({ _id: carId })
@@ -376,15 +377,37 @@ console.log("update ", image, carId)
     url: image,
     views: 0,
     car_id: carId,
-    profile: true,
+    profile: profile,
   })
   let media = await newMedia.save()
   console.log(media._id)
-  await Car.findByIdAndUpdate(carId, { media_id: media._id })
+  car.media.push(media._id)
+  await Car.findByIdAndUpdate(carId, { media: car.media })
+  res.send(await Car.findOne({ _id: carId}).populate('Car_Specification').populate('media'))
 })
 
-app.get("/getUserCars", async (req, res) => {
-  res.json({"cars": "yes"})
+app.get("/getUserCars", async (req: any, res) => {
+  const user = req.decodedToken
+  const user_db = await User.findOne({ uid: user.user_id })
+  const cars = await Car.find({ 
+    user_id: user_db._id
+  })
+  .populate({
+    path: "Car_Specification",
+    match: { manufacturer: { $ne: 'creating'} }
+  })
+  .sort({ createdAd: 1 })
+
+  const filteredCars = cars.filter(car => car.Car_Specification);
+
+  const carIds = filteredCars.map(car => car._id);
+  res.send(carIds)
+})
+
+app.get("/getCarData", async (req, res) => {
+  const { car_id } = req.query;
+  const car = await Car.findOne({ _id: car_id }).populate('Car_Specification').populate('media')
+  res.send(car)
 })
 
 app.listen(3000, () => {

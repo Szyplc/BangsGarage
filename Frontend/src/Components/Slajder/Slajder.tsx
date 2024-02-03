@@ -3,7 +3,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "./Slajder.css";
-import "swiper/swiper-bundle.min.css";
+//import "swiper/swiper-bundle.min.css";
 import { useStyles } from "../../style"; // Import stylów z Material-UI
 import SideMenu from "../../SideMenu/SideMenu";
 import { DoubleClickEvent } from "../../App";
@@ -60,7 +60,7 @@ const Slajder: React.FC = () => {
   const classes = useStyles(); // Inicjalizacja stylów
 
   return (
-    <div className={classes.sliderContainer}>
+    <div>
       <Swiper
         className="swiper-container"
         spaceBetween={50}

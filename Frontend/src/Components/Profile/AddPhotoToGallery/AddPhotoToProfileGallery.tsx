@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import "./AddPhotoToProfileGallery.css"
 import { storage } from "../../../base";
 import { AuthContext } from '../../Auth/AuthContext';
@@ -8,9 +8,10 @@ type AddPhotoToGalleryProps = {
     afterSend: Function | undefined;
     addingMenuProp: boolean;
     filePath: string
+    addButton: boolean;
 }
 
-const AddPhotoToProfileGallery = ({ afterSend, addingMenuProp, filePath }: AddPhotoToGalleryProps) => {
+const AddPhotoToProfileGallery = ({ afterSend, addingMenuProp, filePath, addButton }: AddPhotoToGalleryProps) => {
     const [addingMenu, setAddingMenu] = useState<boolean>(addingMenuProp)
     const [titleValue, setTitleValue] = useState('')
     const [currentFile, setCurrentFile] = useState<Blob | null>(null)
@@ -23,6 +24,12 @@ const AddPhotoToProfileGallery = ({ afterSend, addingMenuProp, filePath }: AddPh
             setTitleValue(file.name)
         }
     };
+
+    useEffect(() => {
+        if(currentFile) {
+            sendPhoto();
+        }
+    }, [currentFile])
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setTitleValue(event.target.value);
@@ -74,8 +81,11 @@ const AddPhotoToProfileGallery = ({ afterSend, addingMenuProp, filePath }: AddPh
             </button>
             {addingMenu && <div>
                 <input type='file' onChange={handleProfileImageChange}/>
-                <input type='text' placeholder='Tytuł' value={titleValue} className='title' onChange={handleTitleChange}/>
-                <button type='button' className='butt' onClick={sendPhoto}>Dodaj</button>
+                {addButton && <>
+                        <input type='text' placeholder='Tytuł' value={titleValue} className='title' onChange={handleTitleChange}/>
+                        <button type='button' className='butt' onClick={sendPhoto}>Dodaj</button>
+                    </>
+                }
             </div>}
         </>
     )

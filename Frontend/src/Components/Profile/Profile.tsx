@@ -12,6 +12,7 @@ import { ref, deleteObject } from "firebase/storage";
 import { storage } from "../../base";
 import axios from "axios";
 import { AuthContext } from "../Auth/AuthContext";
+import UserCar from "../Car/UserCar";
 
 const Profile = () => {
   const { user } = useContext(AuthContext);
@@ -133,37 +134,26 @@ const Profile = () => {
       {...swipeHandlers}
       className="profile-container"
     >
-      <div
-        className="profile-image-wrapper"
-        onClick={() => {
-          navigate("/configuration");
-        }}
-      >
-        <img className="profile-image" src={imageUrl} alt="Profile" />
+      <div>
+        <div
+          className="profile-image-wrapper"
+          onClick={() => {
+            navigate("/configuration");
+          }}
+        >
+          <img className="profile-image" src={imageUrl} alt="Profile" />
+        </div>
+        <div className="profile-description">
+          <p className="profile-description-text">
+            {(age ? "Wiek: " + age : "") +
+              " Płeć: " +
+              gender +
+              ". Opis: " +
+              description}
+          </p>
+        </div>
       </div>
-      <div className="profile-description">
-        <p className="profile-description-text">
-          {(age ? "Wiek: " + age : "") +
-            " Płeć: " +
-            gender +
-            ". Opis: " +
-            description}
-        </p>
-      </div>
-      <Link to="/menuSurveys">
-        <button className="survey-button">Ankiety</button>
-      </Link>
-      {isYourProfile == false ? (
-        <SideMenu showProfile={false} heartColorProp={heartColor} />
-      ) : (
-        <></>
-      )}
-      <AddPhotoToProfileGallery
-        afterSend={get_photos}
-        addingMenuProp={true}
-        filePath={user?.uid + "/gallery/"}
-      ></AddPhotoToProfileGallery>
-      <Gallery photos={photos} DeletePhoto={DeletePhoto} />
+      <UserCar />
     </div>
   );
 };

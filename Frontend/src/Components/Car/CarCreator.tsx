@@ -54,7 +54,7 @@ function CarCreator() {
 
     const updateCarImageProfile = (name: string) => {
         console.log(name)
-        axios.put("http://127.0.0.1:3000/updateCarProfileImage", { image: name, carId: carId }, {
+        axios.put("http://127.0.0.1:3000/updateCarMedia", { image: name, carId: carId, profile: true }, {
             headers: {
               "Content-Type": "application/json",
             }
@@ -65,6 +65,7 @@ function CarCreator() {
     }
   
   return (
+    <div className="content">
     <div id="container">
         <h2>Create a new car</h2>
         <form onSubmit={handleSubmit}>
@@ -111,7 +112,7 @@ function CarCreator() {
                 fullWidth
                 margin="normal"
             />
-            <AddPhotoToProfileGallery afterSend={(name: string) => { updateCarImageProfile(name) }} addingMenuProp={true} filePath={user?.uid + "/" + carId + "/"}></AddPhotoToProfileGallery>
+            <AddPhotoToProfileGallery afterSend={(name: string) => { updateCarImageProfile(name) }} addingMenuProp={true} filePath={user?.uid + "/" + carId + "/"} addButton={false}></AddPhotoToProfileGallery>
             <TextField
                 label="Przebieg"
                 name="mileage"
@@ -125,6 +126,7 @@ function CarCreator() {
             </Button>
         </form>
       
+    </div>
     </div>
   );
 }

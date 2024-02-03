@@ -42,7 +42,7 @@ function Configuration() {
         }));
 
         setGenderOptions(obj);
-        setGender(data.gender ? data.gender : data.genderDictionary[0]);
+        setGender(data.gender ? data.gender : data.genderDictionary.MALE);
         setDescription(data.description);
         setAge(data.age);
         setUserPhoto(data.url);
@@ -111,7 +111,7 @@ function Configuration() {
 
   const updateProfile = async (e: any) => {
     e.preventDefault();
-    
+    console.log(gender)
     const user_database = {
       age: age || "",
       gender: gender || "",

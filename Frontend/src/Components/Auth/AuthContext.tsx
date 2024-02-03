@@ -1,7 +1,8 @@
 import { User, getIdTokenResult, onAuthStateChanged } from "firebase/auth";
 import React, { createContext, useEffect, useState } from "react";
-import { auth } from "../../base";
-import axios, { AxiosError } from "axios";
+import { auth, convertUrlToFullUrl } from "../../base";
+import axios, { AxiosError, AxiosResponse } from "axios";
+import { Media, CarData } from "../../types/types";
 
 interface AuthContextProps {
     isAuthenticated: boolean | null;
@@ -13,6 +14,9 @@ interface AuthContextProps {
     signOutAuthContext: () => void;
     cars_id: string[];
     setCars_id: (value: string[]) => void;
+    getCarsId: () => Promise<string[]>;
+    getCarData: (car_id: string) => Promise<any>;
+    getMediaFullUrl: (car: CarData) => Promise<CarData>
   }
   
   export const AuthContext = createContext<AuthContextProps>({
@@ -21,10 +25,13 @@ interface AuthContextProps {
     user: null,
     setUser: () => {},
     getToken: () => { return new Promise((resolve) => resolve("")) },
-    signIn: (currentUser: User) => {},
+    signIn: () => {},
     signOutAuthContext: () => {},
     cars_id: [],
-    setCars_id: () => {}
+    setCars_id: () => {},
+    getCarsId: () => { return new Promise((resolve) => resolve([])) },
+    getCarData: () => { return new Promise((resolve) => resolve({})) },
+    getMediaFullUrl: () => { return new Promise((resolve) => resolve({} as CarData))}
   });
   
   
@@ -89,20 +96,49 @@ interface AuthContextProps {
       delete axios.defaults.headers.common['Authorization'];
     }
 
-    const getCarsId = async () => {
-      //uzyc endpointa do ktorego damy useruid i pozbieramy wszystkie cars ktore maja id usera
-      axios.put("http://127.0.0.1:3000/updateCarProfileImage", { user: user }, {
-            headers: {
-              "Content-Type": "application/json",
-            }
-          })
-          .catch((error: AxiosError) => {
-            console.error("Wystąpił błąd:", error);
-          })
+    const getCarsId = async (): Promise<string[]> => {
+      try {
+          const response = await axios.get("http://127.0.0.1:3000/getUserCars", {
+              headers: {
+                  "Content-Type": "application/json",
+              }
+          });
+          return response.data;
+      } catch (error) {
+          console.error("Wystąpił błąd:", error);
+          return []; // Zwróć pustą tablicę w przypadku błędu
+      }
+  };
+  
+
+    const getCarData = async (car_id: string) => {
+      let currentData: any;
+      try {
+        currentData = axios.get("http://127.0.0.1:3000/getCarData", {
+          headers: {
+            "Content-Type": "application/json"
+          },
+          params: {
+            car_id :car_id
+          }
+        })
+        return currentData
+      } catch (error) {
+        console.error(error)
+        return {}
+      }
+    }
+
+    const getMediaFullUrl = async (car: CarData) => {
+      car.media.forEach(async (media: Media) => {
+        media.fullUrl = await convertUrlToFullUrl(media.url || "")
+      })
+      car.profileUrl = await convertUrlToFullUrl(car.media.find(obj => obj.profile === true)?.url || "")
+      return car
     }
   
     return (
-      <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, user, setUser, getToken, signIn, signOutAuthContext, cars_id, setCars_id }}>
+      <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, user, setUser, getToken, signIn, signOutAuthContext, cars_id, setCars_id, getCarsId, getCarData, getMediaFullUrl }}>
         {children}
       </AuthContext.Provider>
     );
