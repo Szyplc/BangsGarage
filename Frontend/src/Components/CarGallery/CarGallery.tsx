@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState, useRef, useContext } from "react";
+import { ChangeEvent, useState, useRef, useContext, useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react"
 import { Navigation, Pagination } from "swiper/modules"
 import "swiper/css"
@@ -10,29 +10,22 @@ import "./CarGallery.css"
 import { storage } from "../../base"
 import { AuthContext } from "../Auth/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { CarData, Media } from "../../types/types";
+import { CarData } from "../../types/types";
 import { useLocation } from "react-router-dom";
 import axios, { AxiosError } from "axios";
 
-interface Image {
-    name: string,
-    src: string,
-}
-
 const CarGallery = () => {
     const location = useLocation();
-    const [car, setCar] = useState<CarData>(location.state?.car as CarData)
+    const [car, setCar] = useState<CarData>();
+    useEffect(() => {
+        setCar(location.state?.car as CarData);
+    }, [])//aby tylko raz przypisac wartośći do car żeby nie kolidowało z dodawaniem zdjęc
     const [selectedPhoto, setSelectedPhoto] = useState<string>("")
-    const [photos, setPhotos] = useState<Image[]>([
-        { src: "https://ocdn.eu/pulscms-transforms/1/27Kk9kpTURBXy8yNTA4MDY4Nzk1MTBlZWJiOWQ5MGIyMWQ5MWU4OWUzNi5qcGeRkwXNBLDNAqTeAAKhMAWhMQA", name: "a" },
-        { src: "https://ocdn.eu/pulscms-transforms/1/NFmk9kqTURBXy9jOTY2MDYxNGI1YWMyNTg2OGYxZGI2MmYxNzc0NmI2Ny5qcGVnkpUDAMywzQZAzQOEkwXNBLDNAqTeAAKhMAWhMQA", name: "a" },
-        { src: "https://babolat-tenis.pl/10924-thickbox_default/babolat-jet-tere-ac-m-white-dark-blue.jpg", name: "a" },
-        { src: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS86VcY5DTSvLP4FOVYCbHzxR4lStSyftNaXg&usqp=CAU", name: "a" }
-    ])
     const fileInputRef = useRef<HTMLInputElement>(null)
     const navigate = useNavigate();
     const {
         user,
+        getMediaFullUrl
       } = useContext(AuthContext);
 
     const handlePhotoChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -48,17 +41,16 @@ const CarGallery = () => {
     }
 
     const addPhoto = async () => {
-        if(selectedPhoto != "")
+        if(selectedPhoto != "" && car != undefined)
         {
-            setPhotos((prevPhotos) => [...prevPhotos, { src: selectedPhoto, name: fileInputRef.current?.files?.[0].name as string }])
             const file = fileInputRef.current?.files?.[0] as File;
             //dodawanie do firebase
             const storageRef = storage.ref();
             let name = user?.uid + "/" + car._id + "/" + fileInputRef.current?.files?.[0].name;
             const fileRef = storageRef.child(name);
             await fileRef.put(file)
-            const url = await fileRef.getDownloadURL()
-            let newCarObjRes = await axios.put("http://127.0.0.1:3000/updateCarMedia", { image: url, carId: car._id, profile: false }, {
+            //const url = await fileRef.getDownloadURL()
+            let newCarObjRes = await axios.put("http://127.0.0.1:3000/updateCarMedia", { image: name, carId: car._id, profile: false }, {
                 headers: {
                 "Content-Type": "application/json",
                 }
@@ -67,7 +59,10 @@ const CarGallery = () => {
                 console.error("Wystąpił błąd:", error);
             })
             let newCarObj = newCarObjRes?.data as CarData
-            setCar(newCarObj)
+            console.log(newCarObj?.media.map(item => item.url))
+            const newCar = await getMediaFullUrl(newCarObj)
+            car.media.push(newCar.media[newCar.media.length - 1])
+            setCar(car)
 
             if(fileInputRef.current)
                 fileInputRef.current.value = "";
@@ -80,6 +75,7 @@ const CarGallery = () => {
     }
 
   return (
+    (car &&
     <div className="container" style={{ display: "block", height: "initial"}}>
         <button onClick={undo}>Cofnij</button>
        <Swiper
@@ -92,8 +88,8 @@ const CarGallery = () => {
             centeredSlides={true}
        >
         {car.media.map((media) => (
-            <SwiperSlide style={{ textAlign: "center"}} key={media.fullUrl}><div style={{ background: "white", height: "100%"}}>
-                <img style={{ objectFit: "contain" }} src={media.fullUrl} />
+            <SwiperSlide style={{ textAlign: "center"}} key={media._id}><div style={{ background: "white", height: "100%"}}>
+                <img style={{ objectFit: "contain" }} src={media.fullUrl} alt={media.fullUrl} />
                 </div></SwiperSlide>
         ))}
        </Swiper>
@@ -104,6 +100,7 @@ const CarGallery = () => {
             <button onClick={addPhoto}>Dodaj</button>
         </div>
     </div>
+    )
   );
 };
 

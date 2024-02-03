@@ -23,9 +23,11 @@ const db = firebase.firestore();
 const firestore = firebase.firestore();
 
 const convertUrlToFullUrl = async (url: string) => {
+  if(url == "")
+    return ""
   const storage = getStorage();
   const pathReference = ref(storage, url);
-  return getDownloadURL(pathReference)
+  return await getDownloadURL(pathReference)
 }
 
 export { storage, firebase, inicialize, db, firestore, auth, convertUrlToFullUrl }

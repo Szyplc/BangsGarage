@@ -164,7 +164,7 @@ app.get("/user", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const user = yield User.findOne({ uid: uid });
         const { username, description, age, gender, _id } = user; // Pobranie pól usera
         const profile_picture = yield Media.findOne({ user_id: _id, profile: true });
-        const { url } = profile_picture;
+        const { url } = profile_picture ? profile_picture : "";
         res.json({ genderDictionary: GenderEnum, username: username, description: description, age: age, gender: gender, url: url }); // Zwraca wynik jako odpowiedź JSON
     }
     catch (error) {

@@ -133,7 +133,8 @@ interface AuthContextProps {
       car.media.forEach(async (media: Media) => {
         media.fullUrl = await convertUrlToFullUrl(media.url || "")
       })
-      car.profileUrl = await convertUrlToFullUrl(car.media.find(obj => obj.profile === true)?.url || "")
+      const carProfileImage = car.media.find(obj => obj.profile === true)?.url
+      car.profileUrl = await convertUrlToFullUrl(carProfileImage || "")
       return car
     }
   
