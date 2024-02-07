@@ -16,17 +16,29 @@ import axios, { AxiosError } from "axios";
 
 const CarGallery = () => {
     const location = useLocation();
+    const {
+        user,
+        getMediaFullUrl,
+        getCarData
+      } = useContext(AuthContext);
     const [car, setCar] = useState<CarData>();
+    
+    const getCar = async (carId: string) => {
+        return await getMediaFullUrl((await getCarData(carId)).data);
+    }
     useEffect(() => {
-        setCar(location.state?.car as CarData);
+        //setCar(location.state?.car as CarData);
+        const set = async () => {
+            const newCar = await getCar(location.state?.car._id) as CarData
+            setCar(newCar)
+        }
+        set();
     }, [])//aby tylko raz przypisac wartośći do car żeby nie kolidowało z dodawaniem zdjęc
+
     const [selectedPhoto, setSelectedPhoto] = useState<string>("")
     const fileInputRef = useRef<HTMLInputElement>(null)
     const navigate = useNavigate();
-    const {
-        user,
-        getMediaFullUrl
-      } = useContext(AuthContext);
+    
 
     const handlePhotoChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files && e.target.files[0];
@@ -50,7 +62,7 @@ const CarGallery = () => {
             const fileRef = storageRef.child(name);
             await fileRef.put(file)
             //const url = await fileRef.getDownloadURL()
-            let newCarObjRes = await axios.put("http://127.0.0.1:3000/updateCarMedia", { image: name, carId: car._id, profile: false }, {
+            await axios.put("http://127.0.0.1:3000/updateCarMedia", { image: name, carId: car._id, profile: false }, {
                 headers: {
                 "Content-Type": "application/json",
                 }
@@ -58,11 +70,8 @@ const CarGallery = () => {
             .catch((error: AxiosError) => {
                 console.error("Wystąpił błąd:", error);
             })
-            let newCarObj = newCarObjRes?.data as CarData
-            console.log(newCarObj?.media.map(item => item.url))
-            const newCar = await getMediaFullUrl(newCarObj)
-            car.media.push(newCar.media[newCar.media.length - 1])
-            setCar(car)
+            const newCar = await getCar(location.state?.car._id) as CarData;
+            setCar(newCar)
 
             if(fileInputRef.current)
                 fileInputRef.current.value = "";
@@ -89,7 +98,7 @@ const CarGallery = () => {
        >
         {car.media.map((media) => (
             <SwiperSlide style={{ textAlign: "center"}} key={media._id}><div style={{ background: "white", height: "100%"}}>
-                <img style={{ objectFit: "contain" }} src={media.fullUrl} alt={media.fullUrl} />
+                {media.fullUrl && <img style={{ objectFit: "contain" }} src={media.fullUrl} alt={media.fullUrl} /> }
                 </div></SwiperSlide>
         ))}
        </Swiper>

@@ -130,13 +130,13 @@ interface AuthContextProps {
     }
 
     const getMediaFullUrl = async (car: CarData) => {
-      car.media.forEach(async (media: Media) => {
-        media.fullUrl = await convertUrlToFullUrl(media.url || "")
-      })
-      const carProfileImage = car.media.find(obj => obj.profile === true)?.url
-      car.profileUrl = await convertUrlToFullUrl(carProfileImage || "")
-      return car
-    }
+      for (const media of car.media) {
+        media.fullUrl = await convertUrlToFullUrl(media.url || "");
+      }
+      const carProfileImage = car.media.find(obj => obj.profile === true)?.url;
+      car.profileUrl = await convertUrlToFullUrl(carProfileImage || "");
+      return car;
+    };
   
     return (
       <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, user, setUser, getToken, signIn, signOutAuthContext, cars_id, setCars_id, getCarsId, getCarData, getMediaFullUrl }}>
