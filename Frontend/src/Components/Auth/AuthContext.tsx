@@ -5,13 +5,15 @@ import axios, { AxiosError, AxiosResponse } from "axios";
 import { Media, CarData } from "../../types/types";
 
 interface AuthContextProps {
-    isAuthenticated: boolean | null;
-    setIsAuthenticated: (value: boolean | null) => void;
+  //AUTH
+    isAuthenticated: boolean;
+    setIsAuthenticated: (value: boolean) => void;
     user: User | null;
     setUser: (value: User | null) => void;
     getToken: (userCredential: User | undefined) => Promise<string | undefined>;
     signIn: (currentUser: User) => void;
     signOutAuthContext: () => void;
+    //Cars
     cars_id: string[];
     setCars_id: (value: string[]) => void;
     getCarsId: () => Promise<string[]>;
@@ -20,7 +22,7 @@ interface AuthContextProps {
   }
   
   export const AuthContext = createContext<AuthContextProps>({
-    isAuthenticated: null,
+    isAuthenticated: false,
     setIsAuthenticated: () => {},
     user: null,
     setUser: () => {},
@@ -36,7 +38,7 @@ interface AuthContextProps {
   
   
   export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const [user, setUser] = useState<User | null>(null);
     const [cars_id, setCars_id] = useState<string[]>([]);
   

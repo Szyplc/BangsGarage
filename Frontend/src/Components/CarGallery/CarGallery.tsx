@@ -27,7 +27,6 @@ const CarGallery = () => {
         return await getMediaFullUrl((await getCarData(carId)).data);
     }
     useEffect(() => {
-        //setCar(location.state?.car as CarData);
         const set = async () => {
             const newCar = await getCar(location.state?.car._id) as CarData
             setCar(newCar)
@@ -85,30 +84,30 @@ const CarGallery = () => {
 
   return (
     (car &&
-    <div className="container" style={{ display: "block", height: "initial"}}>
-        <button onClick={undo}>Cofnij</button>
-       <Swiper
-       modules={[Navigation, Pagination, EffectFade]}
-            effect="fade"
-            spaceBetween={50}
-            slidesPerView={1}
-            navigation
-            pagination={{ clickable: true }}
-            centeredSlides={true}
-       >
-        {car.media.map((media) => (
-            <SwiperSlide style={{ textAlign: "center"}} key={media._id}><div style={{ background: "white", height: "100%"}}>
-                {media.fullUrl && <img style={{ objectFit: "contain" }} src={media.fullUrl} alt={media.fullUrl} /> }
-                </div></SwiperSlide>
-        ))}
-       </Swiper>
-       <div>
-            <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoChange} />
-            <img src={selectedPhoto} alt="Tutaj będzie twoje wybrane zdjęcie" 
-                style={{ maxWidth: '100%', height: 'auto' }} />
-            <button onClick={addPhoto}>Dodaj</button>
+        <div className="container" style={{ display: "block", height: "initial"}}>
+            <button onClick={undo}>Cofnij</button>
+        <Swiper
+        modules={[Navigation, Pagination, EffectFade]}
+                effect="fade"
+                spaceBetween={50}
+                slidesPerView={1}
+                navigation
+                pagination={{ clickable: true }}
+                centeredSlides={true}
+        >
+            {car.media.map((media) => (
+                <SwiperSlide style={{ textAlign: "center"}} key={media._id}><div style={{ background: "white", height: "100%"}}>
+                    {media.fullUrl && <img style={{ objectFit: "contain" }} src={media.fullUrl} alt={media.fullUrl} /> }
+                    </div></SwiperSlide>
+            ))}
+        </Swiper>
+        <div>
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoChange} />
+                <img src={selectedPhoto} alt="Tutaj będzie twoje wybrane zdjęcie" 
+                    style={{ maxWidth: '100%', height: 'auto' }} />
+                <button onClick={addPhoto}>Dodaj</button>
+            </div>
         </div>
-    </div>
     )
   );
 };
