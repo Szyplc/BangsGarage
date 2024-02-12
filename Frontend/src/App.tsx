@@ -24,7 +24,7 @@ import { User, getIdTokenResult, onAuthStateChanged } from "firebase/auth";
 import { auth } from "./base";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "./Store/store";
-import { getIsAuthenticated, signIn, signOutAuthContext } from "./Store/authSlice";
+import { getIsAuthenticated, signIn, signOut } from "./Store/authSlice";
 
 export const DoubleClickEvent = createContext<{
   heartColor: string;
@@ -52,13 +52,13 @@ const App: React.FC = () => {
             if (expirationDate.getTime() > new Date().getTime()) {
               dispatch(signIn(currentUser))
             } else {
-              dispatch(signOutAuthContext())
+              dispatch(signOut())
             }
           } catch (error) {
             console.error(error);
           }
         } else {
-          dispatch(signOutAuthContext())
+          dispatch(signOut())
         }
       });
     };
@@ -96,7 +96,7 @@ const App: React.FC = () => {
                     <Route path="/carConfig" element={<CarCreator />} />
                     <Route path="/userCar" element={<UserCar />} />
                     <Route path="/carProfile" element={<CarProfile />} />
-                    <Route path="/carGallery" element={<CarGallery carId=""/>} />
+                    <Route path="/carGallery" element={<CarGallery />} />
                   </>}
                 <Route path="*" element={<Index />} />
               </Routes>

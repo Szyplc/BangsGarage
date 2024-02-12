@@ -4,11 +4,17 @@ import { TextField, Button, FormControl, InputLabel, Select, MenuItem, FormHelpe
 import AddPhotoToProfileGallery from "../Profile/AddPhotoToGallery/AddPhotoToProfileGallery";
 import "./CarCreator.css"
 import axios, { AxiosError } from "axios";
-import { AuthContext } from "../Auth/AuthContext";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "../../Store/store";
+import { loadCarsData } from "../../Store/carSlice";
+import { useNavigate } from "react-router-dom";
+import { getUser } from "../../Store/authSlice";
 
 function CarCreator() {
-    const { user } = useContext(AuthContext);
     const [carId, setCarId]  = useState<string>("")
+    const dispatch = useDispatch<AppDispatch>()
+    const navigate = useNavigate();
+    const user = useSelector(getUser)
     const [carData, setCarData] = useState({
         manufacturer: '',
         model: '',
@@ -39,9 +45,9 @@ function CarCreator() {
           
     }, [])
 
-    const handleSubmit = (event: any) => {
+    const handleSubmit = async (event: any) => {
         event.preventDefault();
-        axios.put("http://127.0.0.1:3000/update_car", {...carData, carId: carId }, {
+        await axios.put("http://127.0.0.1:3000/update_car", {...carData, carId: carId }, {
             headers: {
               "Content-Type": "application/json",
             }
@@ -49,6 +55,8 @@ function CarCreator() {
           .catch((error: AxiosError) => {
             console.error("Wystąpił błąd:", error);
           })
+          await dispatch(loadCarsData())
+          navigate("/profile")
         console.log(carData);
     };
 

@@ -10,6 +10,7 @@ import 'firebase/auth';
 import 'firebase/firestore';
 import admin from 'firebase-admin';
 import { User } from 'firebase/auth';
+import { Media } from "../../types/types"
 const serviceAccount = require('./bangsgarage-firebase-adminsdk-o8ms7-ad6dd68035.json');
 
 const uri = 'mongodb+srv://generalkenobi1919:X3AdbUJMjhaCI8RN@cluster0.zcokpld.mongodb.net/Praktyki';
@@ -165,6 +166,7 @@ app.get("/user", async (req: any, res) => {
     const uid = req?.decodedToken.uid;
     const user = await User.findOne({ uid: uid })
     const { username, description, age, gender, _id} = user; // Pobranie pól usera
+    console.log("id: " ,_id)
     const profile_picture = await Media.findOne({ user_id: _id, profile: true })
     const { url } = profile_picture ? profile_picture : ""
     res.json({genderDictionary: GenderEnum, username: username, description: description, age: age, gender: gender, url: url}); // Zwraca wynik jako odpowiedź JSON
@@ -178,8 +180,11 @@ app.get("/profile_image", async (req: any, res) => {
   try {
     const uid = req?.decodedToken.uid;
     const user = await User.findOne({ uid: uid })
-    const profile_media_object = await Media.findOne({ user_id: user._id, profile: true })
-    const { url } = profile_media_object
+    console.log(user)
+    const profile_media_object = await Media.findOne({ user_id: user._id, profile: true }) as Media | null
+    let url = ""
+    if(profile_media_object?.url != undefined)
+      url = profile_media_object.url
     res.send(url);
   } catch (error) {
     console.error('Wystąpił błąd:', error);
@@ -195,10 +200,12 @@ app.post("/update_profile", async (req: any, res) => {
     const update = { age, gender, description }; // Nowe wartości pól do aktualizacji
 
     await User.updateOne(filter, update); // Aktualizuje jednego użytkownika
-    const user = await User.findOne({ uid: req.decodedToken.uid })
+    console.log(uid)
+    const user = await User.findOne({ uid: uid })
     const { _id } = user;
+    console.log("url: ", url_photo_image)
     if(url_photo_image)
-      await Media.updateOne({ user_id: _id }, { url: url_photo_image });
+      await Media.updateOne({ user_id: _id }, { url: url_photo_image, profile: true });
     res.json({ message: "Profil użytkownika został zaktualizowany" });
   } catch (error) {
     console.error("Wystąpił błąd:", error);

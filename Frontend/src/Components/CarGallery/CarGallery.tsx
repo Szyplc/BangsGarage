@@ -10,7 +10,7 @@ import "./CarGallery.css"
 import { storage } from "../../base"
 import { AuthContext } from "../Auth/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { CarData } from "../../types/types";
+import { CarData } from "../../../../types/types";
 import { useLocation } from "react-router-dom";
 import axios, { AxiosError } from "axios";
 import { Car, loadCarsData, setCar } from "../../Store/carSlice";

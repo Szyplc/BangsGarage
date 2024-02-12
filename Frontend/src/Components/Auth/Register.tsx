@@ -1,18 +1,19 @@
-import { User, UserCredential, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { useContext, useState } from "react";
+import { UserCredential, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../base";
 import "./Register.css";
-import { AuthContext } from "./AuthContext";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../Store/store";
+import { signIn } from "../../Store/authSlice";
 
 function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
-  const [location, setLocation] = useState("");
   const navigate = useNavigate();
-  const { signIn } = useContext(AuthContext);
+  const dispatch = useDispatch<AppDispatch>()
 
   // Funkcja do pobierania lokalizacji użytkownika
   const fetchLocation = (): Promise<number[]> => {
@@ -48,7 +49,7 @@ function Register() {
       localization = [0, 0]
     });
     await createUserWithEmailAndPassword(auth, email, password)
-      .then(async (userCredential) => {
+      .then(async (userCredential: UserCredential) => {
         await axios.post("http://localhost:3000/register", {
           userCredential: userCredential,
           username: username,
@@ -58,18 +59,17 @@ function Register() {
             "Content-Type": "application/json",
           }
         })
-          .then(async (response: any) => {
-            console.log(response.data);
+          .then(async () => {
             await signInWithEmailAndPassword(auth, email, password)
               .then((userCredential: UserCredential) => {
-                signIn(userCredential.user)
+                dispatch(signIn(userCredential.user))
                 navigate('/configuration');
               })
             .catch((error) => {
               console.log("Błąd logowania:", error);
             });
           })
-          .catch((error: string) => {
+          .catch((error) => {
             console.log("Błąd rejestracji:", error);
           });
       })

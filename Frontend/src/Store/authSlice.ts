@@ -27,7 +27,7 @@ export const signIn = createAsyncThunk(
   }
 );
 
-export const signOutAuthContext = createAsyncThunk(
+export const signOut = createAsyncThunk(
   'auth/signOut',
   async (_, thunkAPI) => {
     await firebaseSignOut(auth); // Using Firebase signOut
@@ -62,7 +62,7 @@ export const authSlice = createSlice({
       state.user = action.payload.user;
       state.token = action.payload.token;
     });
-    builder.addCase(signOutAuthContext.fulfilled, (state) => {
+    builder.addCase(signOut.fulfilled, (state) => {
       state.isAuthenticated = false;
       state.user = null;
       state.token = undefined;

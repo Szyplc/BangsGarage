@@ -9,12 +9,14 @@ import SideMenu from "../../SideMenu/SideMenu";
 import { DoubleClickEvent } from "../../App";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { AuthContext } from "../Auth/AuthContext";
 import axios from "axios";
+import { useSelector } from "react-redux";
+import { getUser } from "../../Store/authSlice";
 
 const Slajder: React.FC = () => {
   const [, setActiveIndex] = useState(0);
   const [data, setData] = useState([]);
+  const user = useSelector(getUser)
   const handleSlideChange = (swiper: any) => {
     setActiveIndex(swiper.activeIndex);
   };
@@ -23,25 +25,9 @@ const Slajder: React.FC = () => {
   const handleChangeColor = () => {
     setHeartColor("#ff0000");
   };
-  const { isAuthenticated, setIsAuthenticated, user, setUser } =
-    useContext(AuthContext);
 
   useEffect(() => {
     if (user) {
-      // fetch("http://127.0.0.1:3000/userzy", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //      "authorization": JSON.stringify(user),
-      //   },
-      //   body: JSON.stringify(user),
-      // })
-      //   .catch()
-      //   .then((response) => response.json())
-      //   .catch(error => {
-      //     console.log(error)
-      //   })
-      //   .then((data: any) => setData(data));
       axios
         .post("http://127.0.0.1:3000/userzy", JSON.stringify(user), {
           headers: {

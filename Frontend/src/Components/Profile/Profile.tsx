@@ -3,7 +3,7 @@ import "./Profile.css";
 import Gallery from "./Gallery/Gallery";
 import SideMenu from "../../SideMenu/SideMenu";
 import { Link, useNavigate } from "react-router-dom";
-import { useSwipeable } from "react-swipeable";
+import { LEFT, useSwipeable } from "react-swipeable";
 import { useLocation } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { DoubleClickEvent } from "../../App";
@@ -18,26 +18,6 @@ const Profile = () => {
   const isYourProfile = location.state?.isYourProfile;
   const [photos, setPhotos] = useState([]);
   const get_photos = async () => {
-    //   await fetch("http://127.0.0.1:3000/get_photos_from_gallery", {
-    //         method: "GET",
-    //         headers: {
-    //             "Content-Type": "application/json",
-    //             "authorization": JSON.stringify(user),
-    //         }
-    //     })
-    //     .then((res) => {
-    //       if(!res.ok) {
-    //         throw new Error("Błąd uwierzytelniania")
-    //       }
-    //       return res.json()
-    //     }
-    //     )
-    //     .then((res) => {
-    //       setPhotos(res);
-    //     })
-    //     .catch(() => {
-    //       navigate("/")
-    //     })
     axios
       .get("http://127.0.0.1:3000/get_photos_from_gallery", {
         headers: {
@@ -133,14 +113,24 @@ const Profile = () => {
       className="profile-container"
     >
       <div>
-        <div
-          className="profile-image-wrapper"
-          onClick={() => {
-            navigate("/configuration");
-          }}
-        >
-          <img className="profile-image" src={imageUrl} alt="Profile" />
+        <div>
+          <div style={{ float: "left" }}
+            className="profile-image-wrapper"
+            onClick={() => {
+              navigate("/configuration");
+            }}
+          >
+            <img className="profile-image" src={imageUrl} alt="Profile" />
+          </div>
+          <div style={{ float: "right"}} 
+                onClick={() => {
+                  navigate("/carConfig")
+                }}
+          >
+            Create Car
+          </div>
         </div>
+        <br></br>
         <div className="profile-description">
           <p className="profile-description-text">
             {(age ? "Wiek: " + age : "") +

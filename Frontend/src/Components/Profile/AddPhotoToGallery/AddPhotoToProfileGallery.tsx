@@ -1,7 +1,6 @@
 import { useState, useContext, useEffect } from 'react'
 import "./AddPhotoToProfileGallery.css"
 import { storage } from "../../../base";
-import { AuthContext } from '../../Auth/AuthContext';
 import axios from 'axios';
 
 type AddPhotoToGalleryProps = {
@@ -15,7 +14,6 @@ const AddPhotoToProfileGallery = ({ afterSend, addingMenuProp, filePath, addButt
     const [addingMenu, setAddingMenu] = useState<boolean>(addingMenuProp)
     const [titleValue, setTitleValue] = useState('')
     const [currentFile, setCurrentFile] = useState<Blob | null>(null)
-    const { user } = useContext(AuthContext);
 
     const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {

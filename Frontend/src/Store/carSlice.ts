@@ -1,19 +1,19 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { CarData, Media } from '../types/types'; // Adjust the import paths as necessary
+import { CarData, Media } from '../../../types/types'; // Adjust the import paths as necessary
 import { RootState } from './store';
 import { convertUrlToFullUrl } from '../base';
 
 interface CarState {
   cars_id: string[];
   carData: CarData | null;
-  carsData: CarData[] | null
+  carsData: CarData[]
 }
 
 const initialState: CarState = {
   cars_id: [],
   carData: null,
-  carsData: null
+  carsData: []
 };
 
 // Async thunk for fetching cars IDs
@@ -44,19 +44,16 @@ export const getCarData = createAsyncThunk<CarData | null, string>(
   }
 );
 
-export const loadCarsData = createAsyncThunk<CarData[] | null, void, { state: RootState }>(
+export const loadCarsData = createAsyncThunk<CarData[], void, { state: RootState }>(
     'car/loadCarsData',
     async (_, { getState, dispatch, rejectWithValue }) => {
       try {
-        let { cars_id } = getState().car;
-        if (!cars_id.length) {
-          await dispatch(getCarsId());
-          cars_id = getState().car.cars_id; // Ponowne pobranie cars_id po aktualizacji
-        }
+        await dispatch(getCarsId());
+        let cars_id = getState().car.cars_id;
   
         if (!cars_id.length) {
           console.error("Brak cars_id w stanie.");
-          return null;
+          return [];
         }
   
         const carsDataPromises = cars_id.map(async (car_id) => {
@@ -79,12 +76,13 @@ export const loadCarsData = createAsyncThunk<CarData[] | null, void, { state: Ro
         });
   
         let carsData = await Promise.all(carsDataPromises);
-        carsData = carsData.filter((car): car is CarData => car !== null);
-  
+        carsData = carsData.filter((car) => car !== null);
+
         if (!carsData.length) {
-          return null;
+          return [];
         }
-        return carsData;
+        
+        return carsData as CarData[];
       } catch (error) {
         console.error("Błąd podczas ładowania danych samochodów:", error);
         return rejectWithValue({ message: "Nie udało się załadować danych samochodów." });
@@ -125,9 +123,6 @@ export const carSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(getCarsId.fulfilled, (state, action) => {
       state.cars_id = action.payload;
-    });
-    builder.addCase(getCarData.fulfilled, (state, action) => {
-      //state.carData = action.payload;
     });
     builder.addCase(loadCarsData.fulfilled, (state, action) => {
         state.carsData = action.payload

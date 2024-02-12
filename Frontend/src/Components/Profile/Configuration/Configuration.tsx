@@ -1,10 +1,13 @@
-import { signOut } from "firebase/auth";
-import { useContext, useEffect, useState } from "react";
+//import { signOut } from "firebase/auth";
+import { useEffect, useState } from "react";
 import { auth, storage } from "../../../base";
 import "./Configuration.css";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../../Auth/AuthContext";
 import axios, { AxiosResponse } from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { getUser } from "../../../Store/authSlice";
+import { AppDispatch } from "../../../Store/store";
+import { signOut } from "../../../Store/authSlice"
 
 function Configuration() {
   const default_photo_image = "https://firebasestorage.googleapis.com/v0/b/bangsgarage.appspot.com/o/config%2Fdefault_profile_image.png?alt=media&token=48953722-672d-4f36-9571-75a0c418059b";
@@ -13,10 +16,8 @@ function Configuration() {
   const [genderOptions, setGenderOptions] = useState([]);
   const [description, setDescription] = useState("");
   const [userPhoto, setUserPhoto] = useState<string>(default_photo_image);
-  const {
-    user,
-    signOutAuthContext,
-  } = useContext(AuthContext);
+  const user = useSelector(getUser)
+  const dispatch = useDispatch<AppDispatch>()
   const navigate = useNavigate();
 
   const handleUpload = async (title_new_photo: File) => {
@@ -135,8 +136,7 @@ function Configuration() {
 
   const SignOutOnClick = async () => {
     try {
-      await signOut(auth);
-      signOutAuthContext();
+      dispatch(signOut())
     } catch (error) {
       console.error("Error signing out: ", error);
     }

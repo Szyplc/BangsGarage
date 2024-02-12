@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import "./UserCar.css"
 import { useNavigate } from "react-router-dom";
-import { CarData, Media } from "../../types/types";
+import { CarData, Media } from "../../../../types/types";
 import { useDispatch, useSelector } from "react-redux";
 import { CarsData, getCarsId, loadCarsData, setCar } from "../../Store/carSlice";
 import { AppDispatch } from "../../Store/store";
@@ -12,7 +12,7 @@ const UserCar: React.FC = () => {
     const cars = useSelector(CarsData)
     useEffect(() => {
         const asyncFunction = async () => {
-            if(!cars)
+            if(!cars.length)
                 dispatch(loadCarsData())
         }
         asyncFunction()
