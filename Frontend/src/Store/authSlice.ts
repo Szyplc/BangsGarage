@@ -1,0 +1,81 @@
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import axios from 'axios';
+import { User, onAuthStateChanged, getIdTokenResult, signOut as firebaseSignOut } from "firebase/auth";
+import { auth } from '../base'; // Adjust the import path as needed
+import { RootState } from './store';
+
+interface AuthState {
+  isAuthenticated: boolean;
+  user: User | null;
+  token: string | undefined;
+}
+
+const initialState: AuthState = {
+  isAuthenticated: false,
+  user: null,
+  token: undefined,
+};
+
+// Assuming signInWithEmailAndPassword and signOut are implemented elsewhere or using Firebase Auth
+export const signIn = createAsyncThunk(
+  'auth/signIn',
+  async (currentUser: User, thunkAPI) => {
+    const token = await currentUser.getIdToken();
+    setIsAuthenticated(true)
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    return { user: currentUser, token: token };
+  }
+);
+
+export const signOutAuthContext = createAsyncThunk(
+  'auth/signOut',
+  async (_, thunkAPI) => {
+    await firebaseSignOut(auth); // Using Firebase signOut
+    setIsAuthenticated(false)
+    delete axios.defaults.headers.common['Authorization'];
+  }
+);
+
+export const getToken = createAsyncThunk(
+  'auth/getToken',
+  async (user: User | null, thunkAPI) => {
+    if (!user) throw new Error('No user logged in');
+    const token = await user.getIdToken();
+    return token;
+  }
+);
+
+export const authSlice = createSlice({
+  name: 'auth',
+  initialState,
+  reducers: {
+    setIsAuthenticated: (state, action: PayloadAction<boolean>) => {
+      state.isAuthenticated = action.payload;
+    },
+    setUser: (state, action: PayloadAction<User | null>) => {
+      state.user = action.payload;
+    },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(signIn.fulfilled, (state, action) => {
+      state.isAuthenticated = true;
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+    });
+    builder.addCase(signOutAuthContext.fulfilled, (state) => {
+      state.isAuthenticated = false;
+      state.user = null;
+      state.token = undefined;
+    });
+    builder.addCase(getToken.fulfilled, (state, action) => {
+      state.token = action.payload;
+    });
+  },
+});
+
+export const getIsAuthenticated = ( state: RootState ) => state.auth.isAuthenticated;
+export const getUser = ( state: RootState ) => state.auth.user;
+
+export const { setIsAuthenticated, setUser } = authSlice.actions;
+
+export default authSlice.reducer;

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import "./Components/Slajder/Slajder.css";
 import "./App.css"
@@ -16,11 +16,15 @@ import Register from "./Components/Auth/Register";
 import Index from "./Index";
 import Configuration from "./Components/Profile/Configuration/Configuration";
 import Login from "./Components/Auth/Login";
-import { AuthContext } from "./Components/Auth/AuthContext";
 import CarCreator from "./Components/Car/CarCreator";
 import UserCar from "./Components/Car/UserCar";
 import CarProfile from "./Components/Car/CarProfile";
 import CarGallery from "./Components/CarGallery/CarGallery";
+import { User, getIdTokenResult, onAuthStateChanged } from "firebase/auth";
+import { auth } from "./base";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "./Store/store";
+import { getIsAuthenticated, signIn, signOutAuthContext } from "./Store/authSlice";
 
 export const DoubleClickEvent = createContext<{
   heartColor: string;
@@ -32,12 +36,42 @@ export const DoubleClickEvent = createContext<{
 
 const App: React.FC = () => {
   const [heartColor, setHeartColor] = useState("#ffffff");
-  const { isAuthenticated } = useContext(AuthContext);
+  const isAuthenticated = useSelector(getIsAuthenticated);
+  const dispatch = useDispatch<AppDispatch>()
+  useEffect(() => {
+    let unsubscribe: (() => void) | undefined;
 
-  const handleRedirect = (carId: string) => {
-    // Tutaj możesz przekazać propsy do komponentu CarGallery
-    return <CarGallery carId={carId} />;
-  };
+    const asyncFunction = async () => {
+      unsubscribe = onAuthStateChanged(auth, async (currentUser: User | null) => {
+        if (currentUser) {
+          try {
+            const tokenResult = await getIdTokenResult(currentUser, true);
+            const expirationTime = tokenResult.expirationTime; // Jest to obiekt Date
+            const expirationDate = new Date(expirationTime);
+  
+            if (expirationDate.getTime() > new Date().getTime()) {
+              dispatch(signIn(currentUser))
+            } else {
+              dispatch(signOutAuthContext())
+            }
+          } catch (error) {
+            console.error(error);
+          }
+        } else {
+          dispatch(signOutAuthContext())
+        }
+      });
+    };
+  
+    asyncFunction();
+  
+    // Funkcja czyszcząca
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, []);
 
   return (
       <Router>
@@ -76,7 +110,7 @@ const App: React.FC = () => {
 
 const MenuContainer: React.FC = () => {
   const location = useLocation();
-  const { isAuthenticated } = useContext(AuthContext);
+  const isAuthenticated = useSelector(getIsAuthenticated);
   const isConfigurationPage = 
   location.pathname === "/configuration"
   || location.pathname === "/login"

@@ -11,11 +11,9 @@ import AddPhotoToProfileGallery from "./AddPhotoToGallery/AddPhotoToProfileGalle
 import { ref, deleteObject } from "firebase/storage";
 import { storage } from "../../base";
 import axios from "axios";
-import { AuthContext } from "../Auth/AuthContext";
 import UserCar from "../Car/UserCar";
 
 const Profile = () => {
-  const { user } = useContext(AuthContext);
   const location = useLocation();
   const isYourProfile = location.state?.isYourProfile;
   const [photos, setPhotos] = useState([]);

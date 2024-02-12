@@ -13,32 +13,21 @@ import { useNavigate } from "react-router-dom";
 import { CarData } from "../../types/types";
 import { useLocation } from "react-router-dom";
 import axios, { AxiosError } from "axios";
+import { Car, loadCarsData, setCar } from "../../Store/carSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { getUser } from "../../Store/authSlice";
+import { AppDispatch } from "../../Store/store";
 
 const CarGallery = () => {
     const location = useLocation();
-    const {
-        user,
-        getMediaFullUrl,
-        getCarData
-      } = useContext(AuthContext);
-    const [car, setCar] = useState<CarData>();
-    
-    const getCar = async (carId: string) => {
-        return await getMediaFullUrl((await getCarData(carId)).data);
-    }
-    useEffect(() => {
-        const set = async () => {
-            const newCar = await getCar(location.state?.car._id) as CarData
-            setCar(newCar)
-        }
-        set();
-    }, [])//aby tylko raz przypisac wartośći do car żeby nie kolidowało z dodawaniem zdjęc
+    const car = useSelector(Car)
+    const user = useSelector(getUser)
+    const dispatch = useDispatch<AppDispatch>()
 
     const [selectedPhoto, setSelectedPhoto] = useState<string>("")
     const fileInputRef = useRef<HTMLInputElement>(null)
     const navigate = useNavigate();
     
-
     const handlePhotoChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files && e.target.files[0];
         if(file) {
@@ -69,12 +58,11 @@ const CarGallery = () => {
             .catch((error: AxiosError) => {
                 console.error("Wystąpił błąd:", error);
             })
-            const newCar = await getCar(location.state?.car._id) as CarData;
-            setCar(newCar)
 
             if(fileInputRef.current)
                 fileInputRef.current.value = "";
             setSelectedPhoto("")
+            dispatch(loadCarsData())
         }
     }
 

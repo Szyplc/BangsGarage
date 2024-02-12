@@ -2,7 +2,7 @@ export interface Media {
     _id: string;
     url: string;
     fullUrl: string;
-    profile: boolean;
+    profile?: boolean;
 }
 
 export interface CarData {
@@ -18,7 +18,7 @@ export interface CarData {
         version: string;
         milage: number
     },
-    media: [Media]
-    profileUrl: string
+    media: Media[]
+    profileUrl?: string
     //jeszcze więcej ale na razie nie chce mi się wprowadzać
 }
