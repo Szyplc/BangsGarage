@@ -66,8 +66,10 @@ export const loadCarsData = createAsyncThunk<CarData[], void, { state: RootState
               fullUrl: await convertUrlToFullUrl(media.url)
             })));
 
-            const profileUrl = updatedMedia.find(m => m.profile)?.fullUrl || 'domyślny_url_obrazka';
-  
+            //domyślne zdjęcie url może uledz zmianie
+            const profileUrl = updatedMedia.find(m => m.profile)?.fullUrl 
+            || 'https://firebasestorage.googleapis.com/v0/b/bangsgarage.appspot.com/o/config%2Fdefault_car.png?alt=media&token=2ae582b6-ad31-4987-8f6c-39114743aa64';
+            
             return { ...carData, media: updatedMedia, profileUrl };
           } catch (error) {
             console.error(`Błąd podczas ładowania danych samochodu o ID ${car_id}:`, error);

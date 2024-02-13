@@ -11,6 +11,7 @@ import { signOut } from "../../../Store/authSlice"
 
 function Configuration() {
   const default_photo_image = "https://firebasestorage.googleapis.com/v0/b/bangsgarage.appspot.com/o/config%2Fdefault_profile_image.png?alt=media&token=48953722-672d-4f36-9571-75a0c418059b";
+  const [username, setUsername] = useState("")
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
   const [genderOptions, setGenderOptions] = useState([]);
@@ -41,7 +42,7 @@ function Configuration() {
           _id: key,
           name: value
         }));
-
+        setUsername(data.username)
         setGenderOptions(obj);
         setGender(data.gender ? data.gender : data.genderDictionary.MALE);
         setDescription(data.description);
@@ -114,6 +115,7 @@ function Configuration() {
     e.preventDefault();
     console.log(gender)
     const user_database = {
+      username: username || "",
       age: age || "",
       gender: gender || "",
       description: description || "",
@@ -154,6 +156,13 @@ function Configuration() {
         <h1>Profile Configuration</h1>
         <h4>{user?.email}</h4>
         <h3 onClick={SignOutOnClick}>Wyloguj</h3>
+        <input type="text" 
+          placeholder="username"
+          value={username || ""}
+          onChange={(e) => setUsername(e.target.value)}
+          className="register-input"
+        />
+
         <input
           type="number"
           placeholder="Enter your age"

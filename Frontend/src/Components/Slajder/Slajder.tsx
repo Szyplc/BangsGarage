@@ -27,20 +27,7 @@ const Slajder: React.FC = () => {
   };
 
   useEffect(() => {
-    if (user) {
-      axios
-        .post("http://127.0.0.1:3000/userzy", JSON.stringify(user), {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-        .then((response) => {
-          setData(response.data);
-        })
-        .catch((error) => {
-          console.log("Wystąpił błąd:", error);
-        });
-    }
+    
   }, []);
 
   const classes = useStyles(); // Inicjalizacja stylów

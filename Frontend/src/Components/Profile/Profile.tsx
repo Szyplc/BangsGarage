@@ -32,6 +32,7 @@ const Profile = () => {
   useEffect(() => {
     get_photos();
   }, []);
+  const [username, setUsername] = useState("")
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
   const [description, setDescription] = useState("");
@@ -51,8 +52,9 @@ const Profile = () => {
           "Content-Type": "application/json",
         },
       })
-      .then((response) => {
+      .then((response: any) => {
         const data = response.data;
+        setUsername(data.username)
         setGender(data.gender ? data.gender : data.genderDictionary.MALE);
         setDescription(data.description);
         setAge(data.age);
@@ -109,7 +111,7 @@ const Profile = () => {
               navigate("/configuration");
             }}
           >
-            <img className="profile-image" src={imageUrl} alt="Profile" />
+            <img className="profile-image" src={imageUrl} alt="Profile" width={100} height={100}/>
           </div>
           <div style={{ float: "right"}} 
                 onClick={() => {
@@ -122,7 +124,7 @@ const Profile = () => {
         <br></br>
         <div className="profile-description">
           <p className="profile-description-text">
-            {(age ? "Wiek: " + age : "") +
+            {username} {(age ? "Wiek: " + age : "") +
               " Płeć: " +
               gender +
               ". Opis: " +

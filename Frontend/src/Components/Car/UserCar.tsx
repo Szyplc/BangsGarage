@@ -13,6 +13,7 @@ const UserCar: React.FC = () => {
         const asyncFunction = async () => {
             if(!cars.length)
                 dispatch(loadCarsData())
+            dispatch(setCarById(""))
         }
         asyncFunction()
     }, [])

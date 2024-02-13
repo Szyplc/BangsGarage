@@ -162,7 +162,7 @@ app.get("/user", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const uid = req === null || req === void 0 ? void 0 : req.decodedToken.uid;
         const user = yield User.findOne({ uid: uid });
-        const { username, description, age, gender, _id } = user; // Pobranie pól usera
+        const { username = "", description = "", age = 0, gender = "", _id = "" } = user || {}; // Pobranie pól usera
         const profile_picture = yield Media.findOne({ user_id: _id, profile: true });
         const { url } = profile_picture ? profile_picture : "";
         res.json({ genderDictionary: GenderEnum, username: username, description: description, age: age, gender: gender, url: url }); // Zwraca wynik jako odpowiedź JSON
@@ -210,24 +210,28 @@ app.post("/update_profile", (req, res) => __awaiter(void 0, void 0, void 0, func
 }));
 app.post("/post_photo_to_gallery", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, title, fullUrl } = req.body;
-    const uid = req.decodedToken.uid;
-    try {
-        const filter = { uid: uid }; // Filtruje użytkownika po identyfikatorze
-        const user = yield User.findOne(filter);
-        const newMediaEntry = new Media({
-            _id: new mongoose_1.default.Types.ObjectId(),
-            name: name,
-            title: title,
-            url: fullUrl,
-            user_id: user._id
-        });
-        yield newMediaEntry.save();
-        res.send("Posted");
+    if (typeof name == 'string' && typeof title == 'string' && typeof fullUrl == 'string') {
+        const uid = req.decodedToken.uid;
+        try {
+            const filter = { uid: uid }; // Filtruje użytkownika po identyfikatorze
+            const user = yield User.findOne(filter);
+            const newMediaEntry = new Media({
+                _id: new mongoose_1.default.Types.ObjectId(),
+                name: name,
+                title: title,
+                url: fullUrl,
+                user_id: user._id
+            });
+            yield newMediaEntry.save();
+            res.send("Posted");
+        }
+        catch (error) {
+            console.error("Wystapil blad", error);
+            res.status(500).json({ error: "Wystapil blad podczas aktualizacji profilu uzytkownika" });
+        }
     }
-    catch (error) {
-        console.error("Wystapil blad", error);
-        res.status(500).json({ error: "Wystapil blad podczas aktualizacji profilu uzytkownika" });
-    }
+    else
+        res.status(500).json({ error: "Podaj poprawne dane!" });
 }));
 app.get("/get_photos_from_gallery", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const uid = req.decodedToken.uid;
@@ -340,15 +344,15 @@ app.put("/update_car", (req, res) => __awaiter(void 0, void 0, void 0, function*
             version: '',
             mileage: 0,
         };
-        if (manufacturer !== undefined)
+        if (manufacturer !== undefined && typeof manufacturer == 'string')
             updateData.manufacturer = manufacturer;
-        if (model !== undefined)
+        if (model !== undefined && typeof manufacturer == 'string')
             updateData.model = model;
         if (year !== undefined)
             updateData.year = year;
-        if (engineInfo !== undefined)
+        if (engineInfo !== undefined && typeof manufacturer == 'string')
             updateData.engineInfo = engineInfo;
-        if (version !== undefined)
+        if (version !== undefined && typeof manufacturer == 'string')
             updateData.version = version;
         //if (image !== undefined) updateData.image = image;
         if (mileage !== undefined)
@@ -364,7 +368,6 @@ app.put("/updateCarMedia", (req, res) => __awaiter(void 0, void 0, void 0, funct
     const { image, carId, profile } = req.body;
     console.log("update ", image, carId);
     const car = yield Car.findOne({ _id: carId });
-    const car_spec_id = car.Car_Specification;
     const newMedia = new Media({
         _id: new mongoose_1.default.Types.ObjectId(),
         url: image,

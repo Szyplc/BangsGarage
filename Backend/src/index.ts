@@ -165,7 +165,13 @@ app.get("/user", async (req: any, res) => {
   try {
     const uid = req?.decodedToken.uid;
     const user = await User.findOne({ uid: uid })
-    const { username, description, age, gender, _id} = user; // Pobranie pól usera
+    const {
+      username = "",
+      description = "",
+      age = 0,
+      gender = "",
+      _id = ""
+    } = user || {}; // Pobranie pól usera
     const profile_picture = await Media.findOne({ user_id: _id, profile: true })
     const { url } = profile_picture ? profile_picture : ""
     res.json({genderDictionary: GenderEnum, username: username, description: description, age: age, gender: gender, url: url}); // Zwraca wynik jako odpowiedź JSON
@@ -214,23 +220,25 @@ app.post("/update_profile", async (req: any, res) => {
 
 app.post("/post_photo_to_gallery", async (req: any, res) => {//trzeba jeszcze poszukać usera i dopiero tak jak u gory
   const { name, title, fullUrl } = req.body;
-  const uid = req.decodedToken.uid;
-  try {
-    const filter = { uid: uid }; // Filtruje użytkownika po identyfikatorze
-    const user = await User.findOne(filter)
-    const newMediaEntry = new Media({
-      _id: new mongoose.Types.ObjectId(),
-      name: name, 
-      title: title,
-      url: fullUrl,
-      user_id: user._id
-    })
-    await newMediaEntry.save()
-    res.send("Posted")
-  } catch(error) {
-    console.error("Wystapil blad", error)
-    res.status(500).json({ error: "Wystapil blad podczas aktualizacji profilu uzytkownika"})
-  }
+  if(typeof name == 'string' && typeof title == 'string' && typeof fullUrl == 'string') {
+    const uid = req.decodedToken.uid;
+    try {
+      const filter = { uid: uid }; // Filtruje użytkownika po identyfikatorze
+      const user = await User.findOne(filter)
+      const newMediaEntry = new Media({
+        _id: new mongoose.Types.ObjectId(),
+        name: name, 
+        title: title,
+        url: fullUrl,
+        user_id: user._id
+      })
+      await newMediaEntry.save()
+      res.send("Posted")
+    } catch(error) {
+      console.error("Wystapil blad", error)
+      res.status(500).json({ error: "Wystapil blad podczas aktualizacji profilu uzytkownika"})
+    }
+  } else res.status(500).json({ error: "Podaj poprawne dane!" })
 })
 
 app.get("/get_photos_from_gallery", async (req: any, res) => {
@@ -366,13 +374,14 @@ app.put("/update_car", async (req: any, res) => {
       mileage: 0,
     };
     
-    if (manufacturer !== undefined) updateData.manufacturer = manufacturer;
-    if (model !== undefined) updateData.model = model;
+    if (manufacturer !== undefined && typeof manufacturer == 'string') updateData.manufacturer = manufacturer;
+    if (model !== undefined && typeof manufacturer == 'string') updateData.model = model;
     if (year !== undefined) updateData.year = year;
-    if (engineInfo !== undefined) updateData.engineInfo = engineInfo;
-    if (version !== undefined) updateData.version = version;
+    if (engineInfo !== undefined && typeof manufacturer == 'string') updateData.engineInfo = engineInfo;
+    if (version !== undefined && typeof manufacturer == 'string') updateData.version = version;
     //if (image !== undefined) updateData.image = image;
     if (mileage !== undefined) updateData.mileage = mileage;
+
     const updateCar = await Car_Specification.findByIdAndUpdate(car_spec_id, updateData, { new: true });
   } catch(error) {
     console.error("Wystapil blad", error)
@@ -386,9 +395,8 @@ app.put("/updateCarMedia", async (req, res) => {
     carId,
     profile
 } = req.body;
-console.log("update ", image, carId)
+  console.log("update ", image, carId)
   const car = await Car.findOne({ _id: carId })
-  const car_spec_id = car.Car_Specification;
   const newMedia = new Media({
     _id: new mongoose.Types.ObjectId(),
     url: image,

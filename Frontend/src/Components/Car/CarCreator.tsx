@@ -30,8 +30,7 @@ function CarCreator() {
         setCarData({ ...carData, [name]: value });
     };
     useEffect(() => {
-      console.log(car)
-      if(!carData)
+      if(!car)
       {
         axios.post("http://127.0.0.1:3000/create_car", {
             headers: {
@@ -45,6 +44,7 @@ function CarCreator() {
           .catch((error: AxiosError) => {
             console.error("Wystąpił błąd:", error);
           })
+          console.log("stworzono")
       }
       else {
         if(car?.Car_Specification)
@@ -55,6 +55,7 @@ function CarCreator() {
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        console.log(carData)
         await axios.put("http://127.0.0.1:3000/update_car", {...carData, carId: carId }, {
           headers: {
             "Content-Type": "application/json",
@@ -66,18 +67,6 @@ function CarCreator() {
         dispatch(loadCarsData())
         navigate("/profile")
     };
-
-    const updateCarImageProfile = (name: string) => {
-        console.log(name)
-        axios.put("http://127.0.0.1:3000/updateCarMedia", { image: name, carId: carId, profile: true }, {
-            headers: {
-              "Content-Type": "application/json",
-            }
-          })
-          .catch((error: AxiosError) => {
-            console.error("Wystąpił błąd:", error);
-          })
-    }
 
     const undo = () => {
       navigate(-1)
@@ -97,6 +86,7 @@ function CarCreator() {
                 fullWidth
                 margin="normal"
                 required
+                type="text"
             />
             <TextField
                 label="Model"
@@ -106,6 +96,7 @@ function CarCreator() {
                 fullWidth
                 margin="normal"
                 required
+                type="text"
             />
             <TextField
                 label="Rok produkcji"
@@ -115,6 +106,7 @@ function CarCreator() {
                 fullWidth
                 margin="normal"
                 required
+                type="number"
             />
             <TextField
                 label="Informacje o silniku"
@@ -123,6 +115,7 @@ function CarCreator() {
                 onChange={handleChange}
                 fullWidth
                 margin="normal"
+                type="text"
             />
             <TextField
                 label="Wersja/model"
@@ -131,10 +124,10 @@ function CarCreator() {
                 onChange={handleChange}
                 fullWidth
                 margin="normal"
+                type="text"
             />
             
-            <AddPhotoToProfileGallery afterSend={(name: string) => { updateCarImageProfile(name) }} addingMenuProp={true} 
-            filePath={user?.uid + "/" + carId + "/"} addButton={false} imageSource={car?.profileUrl || ""}></AddPhotoToProfileGallery>
+            <AddPhotoToProfileGallery></AddPhotoToProfileGallery>
             
             <TextField
                 label="Przebieg"
@@ -143,6 +136,7 @@ function CarCreator() {
                 onChange={handleChange}
                 fullWidth
                 margin="normal"
+                type="number"
             />
             <Button type="submit" variant="contained" color="primary" style={{ marginTop: "15px" }}>
                 Wyślij
