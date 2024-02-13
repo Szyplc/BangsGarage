@@ -163,7 +163,6 @@ app.get("/user", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const uid = req === null || req === void 0 ? void 0 : req.decodedToken.uid;
         const user = yield User.findOne({ uid: uid });
         const { username, description, age, gender, _id } = user; // Pobranie pól usera
-        console.log("id: ", _id);
         const profile_picture = yield Media.findOne({ user_id: _id, profile: true });
         const { url } = profile_picture ? profile_picture : "";
         res.json({ genderDictionary: GenderEnum, username: username, description: description, age: age, gender: gender, url: url }); // Zwraca wynik jako odpowiedź JSON
@@ -233,7 +232,6 @@ app.post("/post_photo_to_gallery", (req, res) => __awaiter(void 0, void 0, void 
 app.get("/get_photos_from_gallery", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const uid = req.decodedToken.uid;
     try {
-        console.log("uid w get_photos", uid);
         const filter = { uid: uid }; // Filtruje użytkownika po identyfikatorze
         const user = yield User.findOne(filter);
         const { _id } = user;
@@ -265,16 +263,25 @@ app.put("/edit_photo_in_gallery", (req, res) => __awaiter(void 0, void 0, void 0
         res.status(500).json({ error: "Wystapil blad podczas edycji zdjęcia w galerii" });
     }
 }));
-app.post("/delete_photo", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    //usuwanie z bazy danych Media w którym są przechowywane zdjęcia
-    const { profile, url, user_id, _id } = req.body;
-    Media.deleteOne({ _id: _id })
-        .catch(err => {
+app.delete("/delete_photo", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const _id = (_a = req === null || req === void 0 ? void 0 : req.body) === null || _a === void 0 ? void 0 : _a._id;
+    console.log("delete endpoint");
+    console.log(_id);
+    try {
+        if (_id) {
+            yield Media.deleteOne({ _id: _id });
+            res.json({
+                "status": "noo kurde chyba wszystko git"
+            });
+        }
+        else
+            res.status(500).json({ status: "Error" });
+    }
+    catch (err) {
         console.log(err);
-    });
-    res.json({
-        "status": "no kurde chyba wszystko git"
-    });
+        res.status(500).json({ status: "Error", message: err.message });
+    }
 }));
 app.post('/userzy', (req, res) => {
     const userEmail = req.body.email;
@@ -319,17 +326,20 @@ app.post("/create_car", (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 }));
 app.put("/update_car", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { manufacturer, model, year, engineInfo, version, image, mileage, carId } = req.body;
-    console.log(carId);
-    //mamy carId teraz musimy miec id ale car_spec
+    const { manufacturer, model, year, engineInfo, version, mileage, carId } = req.body;
+    if (carId == "")
+        res.status(400).send({ error: "CarId is empty." });
     const car = yield Car.findOne({ _id: carId });
     const car_spec_id = car.Car_Specification;
-    console.log(car_spec_id);
-    //car { user_id - do jakiego nalezy,  Car_Specification - o aucie, likes_count - ile malajkow, views  - ile objerzało, 
-    //media - link do zdjec w fireabse uid-uzytkownika/id_auta/_id_zdjecia
-    //tworzymy objekt car_specyfication
     try {
-        const updateData = {};
+        const updateData = {
+            manufacturer: '',
+            model: '',
+            year: 0,
+            engineInfo: '',
+            version: '',
+            mileage: 0,
+        };
         if (manufacturer !== undefined)
             updateData.manufacturer = manufacturer;
         if (model !== undefined)
@@ -340,11 +350,9 @@ app.put("/update_car", (req, res) => __awaiter(void 0, void 0, void 0, function*
             updateData.engineInfo = engineInfo;
         if (version !== undefined)
             updateData.version = version;
-        if (image !== undefined)
-            updateData.image = image;
+        //if (image !== undefined) updateData.image = image;
         if (mileage !== undefined)
             updateData.mileage = mileage;
-        console.log(updateData);
         const updateCar = yield Car_Specification.findByIdAndUpdate(car_spec_id, updateData, { new: true });
     }
     catch (error) {
@@ -365,7 +373,6 @@ app.put("/updateCarMedia", (req, res) => __awaiter(void 0, void 0, void 0, funct
         profile: profile,
     });
     let media = yield newMedia.save();
-    console.log(media._id);
     car.media.push(media._id);
     yield Car.findByIdAndUpdate(carId, { media: car.media });
     res.send(yield Car.findOne({ _id: carId }).populate('Car_Specification').populate('media'));

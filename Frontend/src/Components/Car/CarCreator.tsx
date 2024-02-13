@@ -1,35 +1,38 @@
-import React, { useEffect, useState, useContext } from "react";
-import Gallery from "../Profile/Gallery/Gallery";
-import { TextField, Button, FormControl, InputLabel, Select, MenuItem, FormHelperText, Input } from '@mui/material';
+import React, { useEffect, useState } from "react";
+import { TextField, Button } from '@mui/material';
 import AddPhotoToProfileGallery from "../Profile/AddPhotoToGallery/AddPhotoToProfileGallery";
 import "./CarCreator.css"
 import axios, { AxiosError } from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "../../Store/store";
-import { loadCarsData } from "../../Store/carSlice";
+import { Car, loadCarsData } from "../../Store/carSlice";
 import { useNavigate } from "react-router-dom";
 import { getUser } from "../../Store/authSlice";
+import { Car_Specification } from "../../../../types/types";
 
 function CarCreator() {
-    const [carId, setCarId]  = useState<string>("")
     const dispatch = useDispatch<AppDispatch>()
     const navigate = useNavigate();
     const user = useSelector(getUser)
-    const [carData, setCarData] = useState({
+    const car = useSelector(Car)
+    const [carId, setCarId]  = useState<string>(car?._id || "")
+    const [carData, setCarData] = useState<Car_Specification>({
         manufacturer: '',
         model: '',
-        year: '',
+        year: 0,
         engineInfo: '',
         version: '',
-        image: null,
-        mileage: '',
+        mileage: 0,
     });
 
-    const handleChange = (event: any) => {
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
         setCarData({ ...carData, [name]: value });
     };
     useEffect(() => {
+      console.log(car)
+      if(!carData)
+      {
         axios.post("http://127.0.0.1:3000/create_car", {
             headers: {
               "Content-Type": "application/json",
@@ -42,22 +45,26 @@ function CarCreator() {
           .catch((error: AxiosError) => {
             console.error("Wystąpił błąd:", error);
           })
+      }
+      else {
+        if(car?.Car_Specification)
+          setCarData(car?.Car_Specification)
+      }
           
     }, [])
 
-    const handleSubmit = async (event: any) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         await axios.put("http://127.0.0.1:3000/update_car", {...carData, carId: carId }, {
-            headers: {
-              "Content-Type": "application/json",
-            }
-          })
-          .catch((error: AxiosError) => {
-            console.error("Wystąpił błąd:", error);
-          })
-          await dispatch(loadCarsData())
-          navigate("/profile")
-        console.log(carData);
+          headers: {
+            "Content-Type": "application/json",
+          }
+        })
+        .catch((error: AxiosError) => {
+          console.error("Wystąpił błąd:", error);
+        })
+        dispatch(loadCarsData())
+        navigate("/profile")
     };
 
     const updateCarImageProfile = (name: string) => {
@@ -71,16 +78,21 @@ function CarCreator() {
             console.error("Wystąpił błąd:", error);
           })
     }
+
+    const undo = () => {
+      navigate(-1)
+    }
   
   return (
     <div className="content">
     <div id="container">
+        <div onClick={undo}>Cofnij</div>
         <h2>Create a new car</h2>
         <form onSubmit={handleSubmit}>
             <TextField
                 label="Producent"
                 name="manufacturer"
-                value={carData.manufacturer}
+                value={carData.manufacturer || ""}
                 onChange={handleChange}
                 fullWidth
                 margin="normal"
@@ -89,7 +101,7 @@ function CarCreator() {
             <TextField
                 label="Model"
                 name="model"
-                value={carData.model}
+                value={carData.model || ""}
                 onChange={handleChange}
                 fullWidth
                 margin="normal"
@@ -98,7 +110,7 @@ function CarCreator() {
             <TextField
                 label="Rok produkcji"
                 name="year"
-                value={carData.year}
+                value={carData.year || ""}
                 onChange={handleChange}
                 fullWidth
                 margin="normal"
@@ -107,7 +119,7 @@ function CarCreator() {
             <TextField
                 label="Informacje o silniku"
                 name="engineInfo"
-                value={carData.engineInfo}
+                value={carData.engineInfo || ""}
                 onChange={handleChange}
                 fullWidth
                 margin="normal"
@@ -115,21 +127,24 @@ function CarCreator() {
             <TextField
                 label="Wersja/model"
                 name="version"
-                value={carData.version}
+                value={carData.version || ""}
                 onChange={handleChange}
                 fullWidth
                 margin="normal"
             />
-            <AddPhotoToProfileGallery afterSend={(name: string) => { updateCarImageProfile(name) }} addingMenuProp={true} filePath={user?.uid + "/" + carId + "/"} addButton={false}></AddPhotoToProfileGallery>
+            
+            <AddPhotoToProfileGallery afterSend={(name: string) => { updateCarImageProfile(name) }} addingMenuProp={true} 
+            filePath={user?.uid + "/" + carId + "/"} addButton={false} imageSource={car?.profileUrl || ""}></AddPhotoToProfileGallery>
+            
             <TextField
                 label="Przebieg"
                 name="mileage"
-                value={carData.mileage}
+                value={carData.mileage || ""}
                 onChange={handleChange}
                 fullWidth
                 margin="normal"
             />
-            <Button type="submit" variant="contained" color="primary" style={{ marginTop: "15px"}}>
+            <Button type="submit" variant="contained" color="primary" style={{ marginTop: "15px" }}>
                 Wyślij
             </Button>
         </form>

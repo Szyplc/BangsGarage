@@ -1,9 +1,8 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect } from "react";
 import "./UserCar.css"
 import { useNavigate } from "react-router-dom";
-import { CarData, Media } from "../../../../types/types";
 import { useDispatch, useSelector } from "react-redux";
-import { CarsData, getCarsId, loadCarsData, setCar } from "../../Store/carSlice";
+import { CarsData, loadCarsData, setCarById } from "../../Store/carSlice";
 import { AppDispatch } from "../../Store/store";
 
 const UserCar: React.FC = () => {
@@ -22,23 +21,23 @@ const UserCar: React.FC = () => {
 
 
     const onCarClick = async (index: number) => {
-        dispatch(setCar(cars?.[index]?._id || ""))
+        dispatch(setCarById(cars?.[index]?._id || ""))
         navigate("/carGallery")
     }
 
     return (
         <div>
-        <div className="container" style={{ height: '100%' }}>
-            {cars && cars.map((car, index) => (
-                <div key={index} className="car" onClick={() => onCarClick(index)}>
-                    {car.profileUrl && <img src={car.profileUrl} alt="Car" />}
-                    <div className="carInfo">
-                        {index + 1}. Manufacturer: {car.Car_Specification.Manufacturer}, 
-                        Model: {car.Car_Specification.Model}
+            <div className="container" style={{ height: '100%' }}>
+                {cars && cars.map((car, index) => (
+                    <div key={index} className="car" onClick={() => onCarClick(index)}>
+                        {car.profileUrl && <img src={car.profileUrl} alt="Car" />}
+                        <div className="carInfo">
+                            {index + 1}. Manufacturer: {car.Car_Specification.manufacturer}, 
+                            Model: {car.Car_Specification.model}
+                        </div>
                     </div>
-                </div>
-            ))}
-        </div>
+                ))}
+            </div>
         </div>
     );
 };

@@ -152,6 +152,7 @@ function Configuration() {
     <div className="sign-Up-container">
       <form className="register-form" onSubmit={updateProfile}>
         <h1>Profile Configuration</h1>
+        <h4>{user?.email}</h4>
         <h3 onClick={SignOutOnClick}>Wyloguj</h3>
         <input
           type="number"

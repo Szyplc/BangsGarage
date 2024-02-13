@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { CarData, Media } from '../../../types/types'; // Adjust the import paths as necessary
+import { CarData } from '../../../types/types'; // Adjust the import paths as necessary
 import { RootState } from './store';
 import { convertUrlToFullUrl } from '../base';
 
@@ -112,12 +112,23 @@ export const carSlice = createSlice({
     setCarsId: (state, action: PayloadAction<string[]>) => {
       state.cars_id = action.payload;
     },
-    setCar: (state, action: PayloadAction<string>) => {
+    setCarById: (state, action: PayloadAction<string>) => {
         const car = state.carsData?.find(car => car._id == action.payload) as CarData || undefined
         if(car)
             state.carData = car
         else 
             state.carData = null
+    },
+    setCarByCar: (state, action: PayloadAction<CarData>) => {
+      state.carData = action.payload
+      const index = state.carsData.findIndex(car => car._id === action.payload._id);
+      if (index !== -1) {
+        state.carsData = [
+          ...state.carsData.slice(0, index),
+          action.payload,
+          ...state.carsData.slice(index + 1)
+        ];
+      }
     }
   },
   extraReducers: (builder) => {
@@ -141,6 +152,6 @@ export const CarsId = ( state: RootState ) => state.car.cars_id;
 export const CarsData = ( state: RootState ) => state.car.carsData;
 export const Car = ( state: RootState ) => state.car.carData
 
-export const { setCarsId, setCar } = carSlice.actions;
+export const { setCarsId, setCarByCar, setCarById } = carSlice.actions;
 
 export default carSlice.reducer;

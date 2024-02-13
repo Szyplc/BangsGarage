@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import "./AddPhotoToProfileGallery.css"
 import { storage } from "../../../base";
 import axios from 'axios';
@@ -8,12 +8,14 @@ type AddPhotoToGalleryProps = {
     addingMenuProp: boolean;
     filePath: string
     addButton: boolean;
+    imageSource: string;
 }
 
-const AddPhotoToProfileGallery = ({ afterSend, addingMenuProp, filePath, addButton }: AddPhotoToGalleryProps) => {
+const AddPhotoToProfileGallery = ({ afterSend, addingMenuProp, filePath, addButton, imageSource }: AddPhotoToGalleryProps) => {
     const [addingMenu, setAddingMenu] = useState<boolean>(addingMenuProp)
     const [titleValue, setTitleValue] = useState('')
     const [currentFile, setCurrentFile] = useState<Blob | null>(null)
+    const [imgSrc, setImgSrc] = useState<string>(imageSource)
 
     const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
@@ -79,6 +81,7 @@ const AddPhotoToProfileGallery = ({ afterSend, addingMenuProp, filePath, addButt
             </button>
             {addingMenu && <div>
                 <input type='file' onChange={handleProfileImageChange}/>
+                <img src={imgSrc} width={100} height={100}/>
                 {addButton && <>
                         <input type='text' placeholder='Tytuł' value={titleValue} className='title' onChange={handleTitleChange}/>
                         <button type='button' className='butt' onClick={sendPhoto}>Dodaj</button>

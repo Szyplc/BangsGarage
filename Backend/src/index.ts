@@ -10,7 +10,7 @@ import 'firebase/auth';
 import 'firebase/firestore';
 import admin from 'firebase-admin';
 import { User } from 'firebase/auth';
-import { Media } from "../../types/types"
+import { Car_Specification, Media } from "../../types/types"
 const serviceAccount = require('./bangsgarage-firebase-adminsdk-o8ms7-ad6dd68035.json');
 
 const uri = 'mongodb+srv://generalkenobi1919:X3AdbUJMjhaCI8RN@cluster0.zcokpld.mongodb.net/Praktyki';
@@ -166,7 +166,6 @@ app.get("/user", async (req: any, res) => {
     const uid = req?.decodedToken.uid;
     const user = await User.findOne({ uid: uid })
     const { username, description, age, gender, _id} = user; // Pobranie pól usera
-    console.log("id: " ,_id)
     const profile_picture = await Media.findOne({ user_id: _id, profile: true })
     const { url } = profile_picture ? profile_picture : ""
     res.json({genderDictionary: GenderEnum, username: username, description: description, age: age, gender: gender, url: url}); // Zwraca wynik jako odpowiedź JSON
@@ -237,7 +236,6 @@ app.post("/post_photo_to_gallery", async (req: any, res) => {//trzeba jeszcze po
 app.get("/get_photos_from_gallery", async (req: any, res) => {
   const uid = req.decodedToken.uid
   try {
-    console.log("uid w get_photos", uid)
     const filter = { uid: uid }; // Filtruje użytkownika po identyfikatorze
     const user = await User.findOne(filter)
     const { _id } = user;
@@ -275,16 +273,24 @@ app.put("/edit_photo_in_gallery", async (req: any, res) => {
   }
 });
 
-app.post("/delete_photo", async (req, res) => {
-  //usuwanie z bazy danych Media w którym są przechowywane zdjęcia
-  const { profile, url, user_id, _id } = req.body;
-  Media.deleteOne({ _id: _id })
-  .catch(err => {
-    console.log(err)
-  })
-  res.json({
-    "status": "no kurde chyba wszystko git"
-  })
+app.delete("/delete_photo", async (req, res) => {
+  const _id  = req?.body?._id;
+  console.log("delete endpoint")
+  console.log(_id)
+  
+  try {
+    if(_id) {
+      await Media.deleteOne({ _id: _id });
+      res.json({
+        "status": "noo kurde chyba wszystko git"
+      });
+    }
+    else 
+      res.status(500).json({ status: "Error" })
+  } catch (err: any) {
+    console.log(err);
+    res.status(500).json({ status: "Error", message: err.message });
+  }
 })
 
 app.post('/userzy', (req, res) => {
@@ -339,30 +345,34 @@ app.put("/update_car", async (req: any, res) => {
     year,
     engineInfo,
     version,
-    image,
     mileage,
     carId
 } = req.body;
-  console.log(carId)
-  //mamy carId teraz musimy miec id ale car_spec
+
+  if(carId == "")
+    res.status(400).send({ error: "CarId is empty." })
+
   const car = await Car.findOne({ _id: carId })
   const car_spec_id = car.Car_Specification;
-  console.log(car_spec_id)
-
-  //car { user_id - do jakiego nalezy,  Car_Specification - o aucie, likes_count - ile malajkow, views  - ile objerzało, 
-  //media - link do zdjec w fireabse uid-uzytkownika/id_auta/_id_zdjecia
-
-  //tworzymy objekt car_specyfication
-  try {
-    const updateData: any = {};
+   
+  try { 
+  
+    const updateData: Car_Specification = {
+      manufacturer: '',
+      model: '',
+      year: 0,
+      engineInfo: '',
+      version: '',
+      mileage: 0,
+    };
+    
     if (manufacturer !== undefined) updateData.manufacturer = manufacturer;
     if (model !== undefined) updateData.model = model;
     if (year !== undefined) updateData.year = year;
     if (engineInfo !== undefined) updateData.engineInfo = engineInfo;
     if (version !== undefined) updateData.version = version;
-    if (image !== undefined) updateData.image = image;
+    //if (image !== undefined) updateData.image = image;
     if (mileage !== undefined) updateData.mileage = mileage;
-    console.log(updateData)
     const updateCar = await Car_Specification.findByIdAndUpdate(car_spec_id, updateData, { new: true });
   } catch(error) {
     console.error("Wystapil blad", error)
@@ -387,7 +397,6 @@ console.log("update ", image, carId)
     profile: profile,
   })
   let media = await newMedia.save()
-  console.log(media._id)
   car.media.push(media._id)
   await Car.findByIdAndUpdate(carId, { media: car.media })
   res.send(await Car.findOne({ _id: carId}).populate('Car_Specification').populate('media'))

@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { User, onAuthStateChanged, getIdTokenResult, signOut as firebaseSignOut } from "firebase/auth";
+import { User, signOut as firebaseSignOut } from "firebase/auth";
 import { auth } from '../base'; // Adjust the import path as needed
 import { RootState } from './store';
 
@@ -19,7 +19,7 @@ const initialState: AuthState = {
 // Assuming signInWithEmailAndPassword and signOut are implemented elsewhere or using Firebase Auth
 export const signIn = createAsyncThunk(
   'auth/signIn',
-  async (currentUser: User, thunkAPI) => {
+  async (currentUser: User) => {
     const token = await currentUser.getIdToken();
     setIsAuthenticated(true)
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -29,7 +29,7 @@ export const signIn = createAsyncThunk(
 
 export const signOut = createAsyncThunk(
   'auth/signOut',
-  async (_, thunkAPI) => {
+  async (_) => {
     await firebaseSignOut(auth); // Using Firebase signOut
     setIsAuthenticated(false)
     delete axios.defaults.headers.common['Authorization'];
@@ -38,7 +38,7 @@ export const signOut = createAsyncThunk(
 
 export const getToken = createAsyncThunk(
   'auth/getToken',
-  async (user: User | null, thunkAPI) => {
+  async (user: User | null) => {
     if (!user) throw new Error('No user logged in');
     const token = await user.getIdToken();
     return token;

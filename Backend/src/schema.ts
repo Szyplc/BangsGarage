@@ -40,7 +40,7 @@ const Car_Specification_schema = new mongoose.Schema({
   year: { type: Number, required: true },
   engineInfo: { type: String, required: false },
   version: { type: String, required: false },
-  milage: { type: Number, required: false}
+  mileage: { type: Number, required: false}
   //na razie tyle
 }, { timestamps: true })
 //Media jako pojedyncze zdjęcie możliwośc korzystania w poście od auta jako zdjęcie profilowe użytkownika

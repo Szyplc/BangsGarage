@@ -3,11 +3,10 @@ import "./Profile.css";
 import Gallery from "./Gallery/Gallery";
 import SideMenu from "../../SideMenu/SideMenu";
 import { Link, useNavigate } from "react-router-dom";
-import { LEFT, useSwipeable } from "react-swipeable";
+import { useSwipeable } from "react-swipeable";
 import { useLocation } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { DoubleClickEvent } from "../../App";
-import AddPhotoToProfileGallery from "./AddPhotoToGallery/AddPhotoToProfileGallery";
 import { ref, deleteObject } from "firebase/storage";
 import { storage } from "../../base";
 import axios from "axios";
@@ -15,7 +14,6 @@ import UserCar from "../Car/UserCar";
 
 const Profile = () => {
   const location = useLocation();
-  const isYourProfile = location.state?.isYourProfile;
   const [photos, setPhotos] = useState([]);
   const get_photos = async () => {
     axios
@@ -72,15 +70,6 @@ const Profile = () => {
   };
 
   const DeletePhoto = (photo: any) => {
-    //usuwanie w mongodb
-    // fetch("http://127.0.0.1:3000/delete_photo", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify(photo)
-    // })
-    // .then((response) => response.json())
     axios
       .post("http://127.0.0.1:3000/delete_photo", photo, {
         headers: {
