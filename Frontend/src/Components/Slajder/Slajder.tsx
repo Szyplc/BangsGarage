@@ -10,13 +10,18 @@ import { DoubleClickEvent } from "../../App";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getUser } from "../../Store/authSlice";
+import { AppDispatch } from "../../Store/store";
+import { CarsToShow, getCarToShow } from "../../Store/carSlice";
+import SwiperWithMedia from "../SwiperWithMedia/SwiperWithMedia";
 
 const Slajder: React.FC = () => {
   const [, setActiveIndex] = useState(0);
-  const [data, setData] = useState([]);
   const user = useSelector(getUser)
+  const dispatch = useDispatch<AppDispatch>()
+  const carsToShow = useSelector(CarsToShow)
+  console.log(carsToShow)
   const handleSlideChange = (swiper: any) => {
     setActiveIndex(swiper.activeIndex);
   };
@@ -27,96 +32,33 @@ const Slajder: React.FC = () => {
   };
 
   useEffect(() => {
-    
+    const asyncFunction = async () => {
+      dispatch(getCarToShow(1))
+    }
+    asyncFunction()
   }, []);
 
   const classes = useStyles(); // Inicjalizacja stylów
 
   return (
     <div>
-      <Swiper
+    {carsToShow[0]?.media && <SwiperWithMedia mediaProp={carsToShow[0]?.media}></SwiperWithMedia>}
+      {/*<Swiper
         className="swiper-container"
         spaceBetween={50}
         slidesPerView={1}
         direction="vertical"
         onSlideChange={handleSlideChange}
       >
-        {/*<SwiperSlide>
-          <img
-            src="https://swiperjs.com/demos/images/nature-1.jpg"
-            alt="Nature 1"
-          />
-          <SideMenu heartColorProp={heartColor}></SideMenu>
-          <div className={classes.iconOverlay}>
-            <FontAwesomeIcon icon={faStar} className={classes.starIcon} />
-          </div>
-          <Description></Description>
-        </SwiperSlide>
-        <SwiperSlide>
-          <img
-            src="https://swiperjs.com/demos/images/nature-2.jpg"
-            alt="Nature 2"
-          />
-          <SideMenu heartColorProp={heartColor}></SideMenu>
-          <div className={classes.iconOverlay}>
-            <FontAwesomeIcon icon={faStar} className={classes.starIcon} />
-          </div>
-          <Description></Description>
-        </SwiperSlide>
-        <SwiperSlide>
-          <img
-            src="https://swiperjs.com/demos/images/nature-3.jpg"
-            alt="Nature 3"
-          />
-          <SideMenu heartColorProp={heartColor}></SideMenu>
-          <div className={classes.iconOverlay}>
-            <FontAwesomeIcon icon={faStar} className={classes.starIcon} />
-          </div>
-          <Description></Description>
-        </SwiperSlide>
-        <SwiperSlide>
-          <img
-            src="https://swiperjs.com/demos/images/nature-4.jpg"
-            alt="Nature 4"
-          />
-          <SideMenu heartColorProp={heartColor}></SideMenu>
-          <div className={classes.iconOverlay}>
-            <FontAwesomeIcon icon={faStar} className={classes.starIcon} />
-          </div>
-          <Description></Description>
-        </SwiperSlide>
-        <SwiperSlide>
-          <img
-            src="https://swiperjs.com/demos/images/nature-5.jpg"
-            alt="Nature 5"
-          />
-          <SideMenu heartColorProp={heartColor}></SideMenu>
-          <div className={classes.iconOverlay}>
-            <FontAwesomeIcon icon={faStar} className={classes.starIcon} />
-          </div>
-          <Description></Description>
-  </SwiperSlide>*/}
+        
         {data.map((item: any) => (
           <SwiperSlide key={item._id}>
-            <img
-              onDoubleClick={handleChangeColor}
-              src="https://swiperjs.com/demos/images/nature-4.jpg"
-            />
             <SideMenu heartColorProp={heartColor}></SideMenu>
-            <div className={classes.iconOverlay}>
-              <FontAwesomeIcon icon={faStar} className={classes.starIcon} />
-            </div>
-
-            <div className={classes.opis}>
-              <h3>
-                {item.username} ({item.age})
-              </h3>
-              <div>{item.description}</div>
-            </div>
+            <SwiperWithMedia mediaProp={carsToShow[0]?.media}></SwiperWithMedia>
           </SwiperSlide>
         ))}
-      </Swiper>
-    </div>
+      </Swiper>*/}
+        </div>
   );
 };
 

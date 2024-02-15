@@ -7,14 +7,38 @@ import { convertUrlToFullUrl } from '../base';
 interface CarState {
   cars_id: string[];
   carData: CarData | null;
-  carsData: CarData[]
+  carsData: CarData[];
+  carsToShow: CarData[];
 }
 
 const initialState: CarState = {
   cars_id: [],
   carData: null,
-  carsData: []
+  carsData: [],
+  carsToShow: []
 };
+
+export const getCarToShow = createAsyncThunk<CarData | null, number>(
+  "car/getCarToShow",
+  async (index, { rejectWithValue, }) => {
+    try {
+      const newCar = await (await axios.get("http://127.0.0.1:3000/getCarToSlider", { params: { index: index }})).data as CarData// | null
+      console.log(newCar)
+      if(newCar) {
+        for(const [index, media] of newCar.media.entries()) {
+            const fullUrl = await convertUrlToFullUrl(media.url)
+            newCar.media[index] = { ...media, fullUrl: fullUrl }
+        }
+        const carProfileFullUrl = newCar.media.find(obj => obj.profile === true)?.url
+        newCar.profileUrl = carProfileFullUrl ? await convertUrlToFullUrl(carProfileFullUrl) : ""
+        return newCar;
+      }
+    } catch (err) {
+      rejectWithValue(null)
+    }
+    return null
+  }
+)
 
 // Async thunk for fetching cars IDs
 export const getCarsId = createAsyncThunk<string[]>(
@@ -146,6 +170,11 @@ export const carSlice = createSlice({
     }),
     builder.addCase(getFullUrl.fulfilled, (state, action) => {
         state.carData = action.payload
+    }),
+    builder.addCase(getCarToShow.fulfilled, (state, action) => {
+      if(action.payload != null)
+        if (!state.carsToShow.find(car => car._id === action.payload?._id))
+          state.carsToShow.push(action.payload) 
     })
   },
 });
@@ -153,6 +182,7 @@ export const carSlice = createSlice({
 export const CarsId = ( state: RootState ) => state.car.cars_id;
 export const CarsData = ( state: RootState ) => state.car.carsData;
 export const Car = ( state: RootState ) => state.car.carData
+export const CarsToShow = ( state: RootState ) => state.car.carsToShow
 
 export const { setCarsId, setCarByCar, setCarById } = carSlice.actions;
 

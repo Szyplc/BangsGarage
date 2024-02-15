@@ -21,6 +21,7 @@ const app_1 = require("firebase/app");
 require("firebase/auth");
 require("firebase/firestore");
 const firebase_admin_1 = __importDefault(require("firebase-admin"));
+require("dotenv/config.js");
 const serviceAccount = require('./bangsgarage-firebase-adminsdk-o8ms7-ad6dd68035.json');
 const uri = 'mongodb+srv://generalkenobi1919:X3AdbUJMjhaCI8RN@cluster0.zcokpld.mongodb.net/Praktyki';
 const app = (0, express_1.default)();
@@ -209,8 +210,8 @@ app.post("/update_profile", (req, res) => __awaiter(void 0, void 0, void 0, func
     }
 }));
 app.post("/post_photo_to_gallery", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, title, fullUrl } = req.body;
-    if (typeof name == 'string' && typeof title == 'string' && typeof fullUrl == 'string') {
+    const { name, title, fullUrl, profile, carId } = req.body;
+    if (typeof name == 'string' && typeof title == 'string' && typeof fullUrl == 'string' && typeof profile == 'boolean') {
         const uid = req.decodedToken.uid;
         try {
             const filter = { uid: uid }; // Filtruje użytkownika po identyfikatorze
@@ -220,9 +221,12 @@ app.post("/post_photo_to_gallery", (req, res) => __awaiter(void 0, void 0, void 
                 name: name,
                 title: title,
                 url: fullUrl,
-                user_id: user._id
+                profile: profile,
+                user_id: user._id,
+                car_id: carId
             });
             yield newMediaEntry.save();
+            yield Car.findByIdAndUpdate(carId, { $push: { media: newMediaEntry._id } });
             res.send("Posted");
         }
         catch (error) {
@@ -274,6 +278,15 @@ app.delete("/delete_photo", (req, res) => __awaiter(void 0, void 0, void 0, func
     console.log(_id);
     try {
         if (_id) {
+            /*let media = await Media.findOne({ _id: _id }) as Media || undefined
+            if(media)
+              if(media.profile == true) {
+                 if (media?.user_id != "") {
+                    await User.findByIdAndUpdate(media?.user_id, {
+                      $set: { profile_photo: "" }
+                    })
+                  }
+              }*/
             yield Media.deleteOne({ _id: _id });
             res.json({
                 "status": "noo kurde chyba wszystko git"
@@ -285,6 +298,26 @@ app.delete("/delete_photo", (req, res) => __awaiter(void 0, void 0, void 0, func
     catch (err) {
         console.log(err);
         res.status(500).json({ status: "Error", message: err.message });
+    }
+}));
+app.delete("/delete_car", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _b;
+    const _id = (_b = req === null || req === void 0 ? void 0 : req.body) === null || _b === void 0 ? void 0 : _b._id;
+    try {
+        if (_id) {
+            let car = yield Car.find({ _id: _id });
+            if (car) {
+                yield Car_Specification.deleteOne({ Car_Specification: car.Car_Specification });
+                yield Car.deleteOne({ _id: _id });
+                res.json({ "status": "OK" });
+            }
+            else {
+                res.status(404).json({ "status": "Error" });
+            }
+        }
+    }
+    catch (err) {
+        res.send(err);
     }
 }));
 app.post('/userzy', (req, res) => {
@@ -322,7 +355,7 @@ app.post("/create_car", (req, res) => __awaiter(void 0, void 0, void 0, function
             //meida jako pojedyncze zdjęcie profilowe(główne) auta
         });
         yield newCarEntry.save();
-        res.send(newCarEntry._id);
+        res.send(newCarEntry);
     }
     catch (error) {
         console.error("Wystapil blad", error);
@@ -366,23 +399,34 @@ app.put("/update_car", (req, res) => __awaiter(void 0, void 0, void 0, function*
 }));
 app.put("/updateCarMedia", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { image, carId, profile } = req.body;
-    console.log("update ", image, carId);
+    // Sprawdzanie podstawowej walidacji dla image i carId
+    if (!image || !carId) {
+        return res.status(400).send({ message: "Image i carId są wymagane." });
+    }
+    // Dodatkowo, możesz sprawdzić czy carId istnieje w bazie danych
     const car = yield Car.findOne({ _id: carId });
+    if (!car) {
+        return res.status(404).send({ message: "Nie znaleziono samochodu o podanym carId." });
+    }
+    // Tworzenie nowego obiektu Media
     const newMedia = new Media({
         _id: new mongoose_1.default.Types.ObjectId(),
         url: image,
         views: 0,
         car_id: carId,
-        profile: profile,
+        profile: profile === null || profile === undefined ? false : profile, // Ustawienie domyślnej wartości na false, jeśli profile jest null lub undefined
     });
     let media = yield newMedia.save();
+    // Aktualizacja tablicy media w dokumencie car
     car.media.push(media._id);
     yield Car.findByIdAndUpdate(carId, { media: car.media });
+    // Wysyłanie zaktualizowanego dokumentu car jako odpowiedź
     res.send(yield Car.findOne({ _id: carId }).populate('Car_Specification').populate('media'));
 }));
 app.get("/getUserCars", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user = req.decodedToken;
     const user_db = yield User.findOne({ uid: user.user_id });
+    console.log(user.user_id);
     const cars = yield Car.find({
         user_id: user_db._id
     })
@@ -400,6 +444,33 @@ app.get("/getCarData", (req, res) => __awaiter(void 0, void 0, void 0, function*
     const car = yield Car.findOne({ _id: car_id }).populate('Car_Specification').populate('media');
     res.send(car);
 }));
-app.listen(3000, () => {
+app.get("/getCarToSlider", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _c;
+    const indexToConvert = (_c = req === null || req === void 0 ? void 0 : req.query) === null || _c === void 0 ? void 0 : _c.index; // Pobierz indeks z ciała żądania
+    const index = parseInt(typeof indexToConvert == 'string' ? indexToConvert : "-1");
+    if (typeof index !== 'number' || index < 0) {
+        return res.status(400).send({ message: "Nieprawidłowy index, powinien być liczbą większą od 0." });
+    }
+    try {
+        // Znajdź wszystkie samochody, posortuj je malejąco według liczby polubień
+        const cars = yield Car.find()
+            .sort({ likes_count: -1 })
+            .populate('Car_Specification')
+            .populate('media')
+            .exec();
+        // Wybierz samochód na pozycji index-1 (ponieważ tablice są indeksowane od 0)
+        const carAtIndex = cars[index];
+        if (!carAtIndex) {
+            return res.status(404).send({ message: "Nie znaleziono samochodu na podanym indeksie." });
+        }
+        // Zwróć znaleziony samochód
+        res.send(yield carAtIndex);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).send({ message: "Wystąpił błąd podczas wyszukiwania samochodu." });
+    }
+}));
+app.listen(process.env.PORT, () => {
     console.log('Serwer nasłuchuje na porcie 3000');
 });

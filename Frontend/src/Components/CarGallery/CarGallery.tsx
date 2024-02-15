@@ -1,11 +1,10 @@
 import { ChangeEvent, useState, useRef, useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react"
-import { Navigation, Pagination } from "swiper/modules"
+import { Navigation, Pagination, EffectFade } from "swiper/modules"
 import "swiper/css"
 import "swiper/css/navigation"
 import "swiper/css/pagination"
 import "swiper/css/effect-fade"
-import { EffectFade } from "swiper/modules";
 import "./CarGallery.css"
 import { storage } from "../../base"
 import { useNavigate } from "react-router-dom";
@@ -80,12 +79,13 @@ const CarGallery = () => {
     }
 
     const deleteButton = async () => {
-        console.log(car?.media[currentIndex])
         if (car && car.media && currentIndex >= 0 && currentIndex < car.media.length) {
             await axios.delete("http://127.0.0.1:3000/delete_photo", { data: { _id: car?.media[currentIndex]._id } })
             let newCar = { ...car } as CarData
             newCar.media = newCar.media.filter((_, index) => index !== currentIndex);
-            dispatch(setCarByCar(newCar))
+            const updatedCar = { ...newCar, 
+            profileUrl: "https://firebasestorage.googleapis.com/v0/b/bangsgarage.appspot.com/o/config%2Fdefault_car.png?alt=media&token=2ae582b6-ad31-4987-8f6c-39114743aa64"}
+            dispatch(setCarByCar(updatedCar))
           }
     }
 

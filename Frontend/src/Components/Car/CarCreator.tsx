@@ -5,7 +5,7 @@ import "./CarCreator.css"
 import axios, { AxiosError } from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "../../Store/store";
-import { Car, loadCarsData } from "../../Store/carSlice";
+import { Car, loadCarsData, setCarByCar } from "../../Store/carSlice";
 import { useNavigate } from "react-router-dom";
 import { getUser } from "../../Store/authSlice";
 import { Car_Specification } from "../../../../types/types";
@@ -38,15 +38,16 @@ function CarCreator() {
             }
           })
           .then(response => {
-            setCarId(response.data)
-            console.log(response.data)
+            const newCar = response.data
+            setCarId(newCar._id)
+            dispatch(setCarByCar(newCar))
           })
           .catch((error: AxiosError) => {
             console.error("Wystąpił błąd:", error);
-          })
-          console.log("stworzono")
+          })  
       }
       else {
+        console.log("auto istnieje")
         if(car?.Car_Specification)
           setCarData(car?.Car_Specification)
       }
@@ -71,12 +72,19 @@ function CarCreator() {
     const undo = () => {
       navigate(-1)
     }
+
+    const deleteCar = async () => {
+      axios.delete("http://127.0.0.1:3000/delete_car", { data: { _id: carId } })
+      dispatch(loadCarsData())
+      navigate("/profile")
+    }
   
   return (
     <div className="content">
     <div id="container">
         <div onClick={undo}>Cofnij</div>
         <h2>Create a new car</h2>
+        {car && <button onClick={deleteCar}>Usun</button> }
         <form onSubmit={handleSubmit}>
             <TextField
                 label="Producent"

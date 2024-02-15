@@ -3,6 +3,8 @@ export interface Media {
     url: string;
     fullUrl: string;
     profile?: boolean;
+    user_id?: string;
+    car_id?: string
 }
 
 export interface Car_Specification {
