@@ -57,7 +57,7 @@ function CarCreator() {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         console.log(carData)
-        await axios.put("http://127.0.0.1:3000/update_car", {...carData, carId: carId }, {
+        let res = await axios.put("http://127.0.0.1:3000/update_car", {...carData, carId: carId }, {
           headers: {
             "Content-Type": "application/json",
           }

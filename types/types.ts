@@ -26,3 +26,9 @@ export interface CarData {
     profileUrl?: string
     //jeszcze więcej ale na razie nie chce mi się wprowadzać
 }
+
+export interface Like {
+    _id: string,
+    user_liked_id: string,
+    car_likeing: string
+}

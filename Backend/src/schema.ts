@@ -56,12 +56,12 @@ const Media_schema = new mongoose.Schema({
   title: { type: String },
 }, { timestamps: true })
 
-const Likes = new mongoose.Schema({
+const Likes_schema = new mongoose.Schema({
   id: mongoose.Schema.Types.ObjectId,
   user_liked_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   car_likeing: { type: mongoose.Schema.Types.ObjectId, ref: 'Car' },
-  like_type_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Likes_type' },
-  date_time: { type: Date, default: Date.now },
+  //like_type_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Likes_type' },
+  //date_time: { type: Date, default: Date.now },
 }, { timestamps: true })
 
 const Like_type = new mongoose.Schema({
@@ -111,5 +111,6 @@ const Conversation = mongoose.model('Conversation', Conversation_schema);
 const Media = mongoose.model('Media', Media_schema)
 const Car = mongoose.model("Car", Car_schema)
 const Car_Specification = mongoose.model("Car_Specification", Car_Specification_schema)
+const Likes = mongoose.model("Likes", Likes_schema)
 
-module.exports = { User, Chat_room, Conversation, Media, GenderEnum, Car, Car_Specification/*, Media, Account_type, Connections, Like_type, Likes*/ };
+module.exports = { User, Chat_room, Conversation, Media, GenderEnum, Car, Car_Specification, Likes/*, Media, Account_type, Connections, Like_type*/ };

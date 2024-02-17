@@ -9,13 +9,15 @@ interface CarState {
   carData: CarData | null;
   carsData: CarData[];
   carsToShow: CarData[];
+  carToShowIndex: number;
 }
 
 const initialState: CarState = {
   cars_id: [],
   carData: null,
   carsData: [],
-  carsToShow: []
+  carsToShow: [],
+  carToShowIndex: 0,
 };
 
 export const getCarToShow = createAsyncThunk<CarData | null, number>(
@@ -23,7 +25,6 @@ export const getCarToShow = createAsyncThunk<CarData | null, number>(
   async (index, { rejectWithValue, }) => {
     try {
       const newCar = await (await axios.get("http://127.0.0.1:3000/getCarToSlider", { params: { index: index }})).data as CarData// | null
-      console.log(newCar)
       if(newCar) {
         for(const [index, media] of newCar.media.entries()) {
             const fullUrl = await convertUrlToFullUrl(media.url)
@@ -155,6 +156,9 @@ export const carSlice = createSlice({
           ...state.carsData.slice(index + 1)
         ];
       }
+    },
+    setCarToShowIndex: (state, action: PayloadAction<number>) => {
+      state.carToShowIndex = action.payload
     }
   },
   extraReducers: (builder) => {
@@ -183,7 +187,8 @@ export const CarsId = ( state: RootState ) => state.car.cars_id;
 export const CarsData = ( state: RootState ) => state.car.carsData;
 export const Car = ( state: RootState ) => state.car.carData
 export const CarsToShow = ( state: RootState ) => state.car.carsToShow
+export const CarToShowIndex = (state: RootState ) => state.car.carToShowIndex
 
-export const { setCarsId, setCarByCar, setCarById } = carSlice.actions;
+export const { setCarsId, setCarByCar, setCarById, setCarToShowIndex } = carSlice.actions;
 
 export default carSlice.reducer;

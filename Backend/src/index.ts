@@ -1,4 +1,4 @@
-const { User, Chat_room, Conversation, Media, GenderEnum, Car, Car_Specification } = require('./schema.js');
+const { User, Chat_room, Conversation, Media, GenderEnum, Car, Car_Specification, Likes } = require('./schema.js');
 import mongoose, { mongo } from 'mongoose';
 import cors from "cors"
 import { MongoClient, ObjectId } from 'mongodb';
@@ -10,7 +10,7 @@ import 'firebase/auth';
 import 'firebase/firestore';
 import admin from 'firebase-admin';
 import { User } from 'firebase/auth';
-import { Car_Specification, Media } from "../../types/types"
+import { CarData, Car_Specification, Media, Like } from "../../types/types"
 import "dotenv/config.js"
 const serviceAccount = require('./bangsgarage-firebase-adminsdk-o8ms7-ad6dd68035.json');
 const uri = 'mongodb+srv://generalkenobi1919:X3AdbUJMjhaCI8RN@cluster0.zcokpld.mongodb.net/Praktyki';
@@ -18,6 +18,12 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 //app.use(bodyParser.json());
+
+declare module 'express-serve-static-core' {
+  interface Request {
+    decodedToken?: { [key: string]: any }; // Zdefiniuj typ decodedToken zgodnie z tym, co faktycznie oczekujesz
+  }
+}
 
 let storage, bucket: any;
 async function firebase_connection() {
@@ -292,16 +298,8 @@ app.delete("/delete_photo", async (req, res) => {
   
   try {
     if(_id) {
-      /*let media = await Media.findOne({ _id: _id }) as Media || undefined
-      if(media)
-        if(media.profile == true) {
-           if (media?.user_id != "") {
-              await User.findByIdAndUpdate(media?.user_id, {
-                $set: { profile_photo: "" }
-              })
-            }
-        }*/
       await Media.deleteOne({ _id: _id });
+      
       res.json({
         "status": "noo kurde chyba wszystko git"
       });
@@ -311,6 +309,35 @@ app.delete("/delete_photo", async (req, res) => {
   } catch (err: any) {
     console.log(err);
     res.status(500).json({ status: "Error", message: err.message });
+  }
+})
+
+app.delete("/delete_car_media", async (req, res) => {
+  const _car_id: string = req.body._car_id;
+
+  try {
+    if (_car_id) {
+      // Znajdź wszystkie Media, które mają car_id równy _car_id i profile ustawione na true
+      const mediaToDelete: Array<{ _id: mongoose.Types.ObjectId }> = await Media.find({ car_id: _car_id, profile: true }).select('_id').lean();
+
+      if (mediaToDelete.length > 0) {
+        const mediaIdsToDelete: mongoose.Types.ObjectId[] = mediaToDelete.map(media => media._id);
+        await Media.deleteMany({ _id: { $in: mediaIdsToDelete } });
+
+        // Zaktualizuj Car, usuwając referencje do usuniętych mediów
+        await Car.updateOne({ _id: _car_id }, { $pull: { media: { $in: mediaIdsToDelete } } });
+
+        res.json({ "status": "ok" });
+      } else {
+        // Nie znaleziono mediów do usunięcia
+        res.json({ "status": "no media found to delete" });
+      }
+    } else {
+      res.json({ "status": "not ok" });
+    }
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).send({ "error": err.message });
   }
 })
 
@@ -482,14 +509,15 @@ app.get("/getCarData", async (req, res) => {
 app.get("/getCarToSlider", async (req, res) => {
   const indexToConvert = req?.query?.index; // Pobierz indeks z ciała żądania
   const index = parseInt(typeof indexToConvert == 'string' ? indexToConvert : "-1")
-
+  console.log(index)
   if (typeof index !== 'number' || index < 0) {
+    console.log("nie")
     return res.status(400).send({ message: "Nieprawidłowy index, powinien być liczbą większą od 0." });
   }
 
   try {
     // Znajdź wszystkie samochody, posortuj je malejąco według liczby polubień
-    const cars = await Car.find()
+    const cars = await Car.find({ "media.0": { $exists: true } })
     .sort({ likes_count: -1 })
     .populate('Car_Specification')
     .populate('media')
@@ -506,6 +534,41 @@ app.get("/getCarToSlider", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: "Wystąpił błąd podczas wyszukiwania samochodu." });
+  }
+})
+
+app.post("/give_like_to_car", async (req, res): Promise<void> => {
+  const userId: string = req.decodedToken?.user_id;
+  const carId: string = req?.body?.carId;
+
+  try {
+    // Znajdź użytkownika w bazie danych
+    const user_db = await User.findOne({ uid: userId });
+    if (!user_db) {
+      res.status(404).send({ message: "Nie znaleziono użytkownika." });
+      return;
+    }
+
+    console.log(carId)
+    // Zwiększ licznik polubień w Car
+    const car: CarData | null = await Car.findByIdAndUpdate(carId, { $inc: { likes_count: 1 } }, { new: true });///////////////
+    if (!car) {
+      res.status(404).send({ message: "Nie znaleziono samochodu." });
+      return;
+    }
+    // Stwórz dokument Like
+    const newLike = new Likes({
+      _id: new mongoose.Types.ObjectId(),
+      user_liked_id: user_db._id,
+      car_liking: car._id,
+    });
+
+    await newLike.save();
+
+    res.json({ message: "Lajk dodany.", car });
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).send({ message: "Wystąpił błąd.", error: err.message });
   }
 })
 

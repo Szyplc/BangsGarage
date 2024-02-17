@@ -9,7 +9,6 @@ import "swiper/css/effect-fade"
 
 const SwiperWithMedia = ({ mediaProp }: { mediaProp: Media[] }) => {
     const [media, setMedia] = useState<Media[]>(mediaProp)
-    console.log(media)
     return (
         <Swiper key={1}
         modules={[Navigation, Pagination, EffectFade]}

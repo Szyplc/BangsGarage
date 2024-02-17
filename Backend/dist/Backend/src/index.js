@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const { User, Chat_room, Conversation, Media, GenderEnum, Car, Car_Specification } = require('./schema.js');
+const { User, Chat_room, Conversation, Media, GenderEnum, Car, Car_Specification, Likes } = require('./schema.js');
 const mongoose_1 = __importDefault(require("mongoose"));
 const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
@@ -27,7 +27,6 @@ const uri = 'mongodb+srv://generalkenobi1919:X3AdbUJMjhaCI8RN@cluster0.zcokpld.m
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use((0, cors_1.default)());
-//app.use(bodyParser.json());
 let storage, bucket;
 function firebase_connection() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -278,15 +277,6 @@ app.delete("/delete_photo", (req, res) => __awaiter(void 0, void 0, void 0, func
     console.log(_id);
     try {
         if (_id) {
-            /*let media = await Media.findOne({ _id: _id }) as Media || undefined
-            if(media)
-              if(media.profile == true) {
-                 if (media?.user_id != "") {
-                    await User.findByIdAndUpdate(media?.user_id, {
-                      $set: { profile_photo: "" }
-                    })
-                  }
-              }*/
             yield Media.deleteOne({ _id: _id });
             res.json({
                 "status": "noo kurde chyba wszystko git"
@@ -298,6 +288,33 @@ app.delete("/delete_photo", (req, res) => __awaiter(void 0, void 0, void 0, func
     catch (err) {
         console.log(err);
         res.status(500).json({ status: "Error", message: err.message });
+    }
+}));
+app.delete("/delete_car_media", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const _car_id = req.body._car_id;
+    try {
+        if (_car_id) {
+            // Znajdź wszystkie Media, które mają car_id równy _car_id i profile ustawione na true
+            const mediaToDelete = yield Media.find({ car_id: _car_id, profile: true }).select('_id').lean();
+            if (mediaToDelete.length > 0) {
+                const mediaIdsToDelete = mediaToDelete.map(media => media._id);
+                yield Media.deleteMany({ _id: { $in: mediaIdsToDelete } });
+                // Zaktualizuj Car, usuwając referencje do usuniętych mediów
+                yield Car.updateOne({ _id: _car_id }, { $pull: { media: { $in: mediaIdsToDelete } } });
+                res.json({ "status": "ok" });
+            }
+            else {
+                // Nie znaleziono mediów do usunięcia
+                res.json({ "status": "no media found to delete" });
+            }
+        }
+        else {
+            res.json({ "status": "not ok" });
+        }
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send({ "error": err.message });
     }
 }));
 app.delete("/delete_car", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -448,12 +465,14 @@ app.get("/getCarToSlider", (req, res) => __awaiter(void 0, void 0, void 0, funct
     var _c;
     const indexToConvert = (_c = req === null || req === void 0 ? void 0 : req.query) === null || _c === void 0 ? void 0 : _c.index; // Pobierz indeks z ciała żądania
     const index = parseInt(typeof indexToConvert == 'string' ? indexToConvert : "-1");
+    console.log(index);
     if (typeof index !== 'number' || index < 0) {
+        console.log("nie");
         return res.status(400).send({ message: "Nieprawidłowy index, powinien być liczbą większą od 0." });
     }
     try {
         // Znajdź wszystkie samochody, posortuj je malejąco według liczby polubień
-        const cars = yield Car.find()
+        const cars = yield Car.find({ "media.0": { $exists: true } })
             .sort({ likes_count: -1 })
             .populate('Car_Specification')
             .populate('media')
@@ -469,6 +488,38 @@ app.get("/getCarToSlider", (req, res) => __awaiter(void 0, void 0, void 0, funct
     catch (error) {
         console.error(error);
         res.status(500).send({ message: "Wystąpił błąd podczas wyszukiwania samochodu." });
+    }
+}));
+app.post("/give_like_to_car", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _d, _e;
+    const userId = (_d = req.decodedToken) === null || _d === void 0 ? void 0 : _d.user_id;
+    const carId = (_e = req === null || req === void 0 ? void 0 : req.body) === null || _e === void 0 ? void 0 : _e.carId;
+    try {
+        // Znajdź użytkownika w bazie danych
+        const user_db = yield User.findOne({ uid: userId });
+        if (!user_db) {
+            res.status(404).send({ message: "Nie znaleziono użytkownika." });
+            return;
+        }
+        console.log(carId);
+        // Zwiększ licznik polubień w Car
+        const car = yield Car.findByIdAndUpdate(carId, { $inc: { likes_count: 1 } }, { new: true }); ///////////////
+        if (!car) {
+            res.status(404).send({ message: "Nie znaleziono samochodu." });
+            return;
+        }
+        // Stwórz dokument Like
+        const newLike = new Likes({
+            _id: new mongoose_1.default.Types.ObjectId(),
+            user_liked_id: user_db._id,
+            car_liking: car._id,
+        });
+        yield newLike.save();
+        res.json({ message: "Lajk dodany.", car });
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send({ message: "Wystąpił błąd.", error: err.message });
     }
 }));
 app.listen(process.env.PORT, () => {
