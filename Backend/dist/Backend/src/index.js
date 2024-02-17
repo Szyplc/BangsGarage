@@ -465,9 +465,7 @@ app.get("/getCarToSlider", (req, res) => __awaiter(void 0, void 0, void 0, funct
     var _c;
     const indexToConvert = (_c = req === null || req === void 0 ? void 0 : req.query) === null || _c === void 0 ? void 0 : _c.index; // Pobierz indeks z ciała żądania
     const index = parseInt(typeof indexToConvert == 'string' ? indexToConvert : "-1");
-    console.log(index);
     if (typeof index !== 'number' || index < 0) {
-        console.log("nie");
         return res.status(400).send({ message: "Nieprawidłowy index, powinien być liczbą większą od 0." });
     }
     try {
@@ -501,25 +499,50 @@ app.post("/give_like_to_car", (req, res) => __awaiter(void 0, void 0, void 0, fu
             res.status(404).send({ message: "Nie znaleziono użytkownika." });
             return;
         }
-        console.log(carId);
         // Zwiększ licznik polubień w Car
         const car = yield Car.findByIdAndUpdate(carId, { $inc: { likes_count: 1 } }, { new: true }); ///////////////
         if (!car) {
             res.status(404).send({ message: "Nie znaleziono samochodu." });
             return;
         }
-        // Stwórz dokument Like
-        const newLike = new Likes({
-            _id: new mongoose_1.default.Types.ObjectId(),
-            user_liked_id: user_db._id,
-            car_liking: car._id,
-        });
-        yield newLike.save();
-        res.json({ message: "Lajk dodany.", car });
+        //Sprawdź czy like jest już dodany
+        const isLike = yield Likes.find({ user_liked_id: user_db._id, car_liking: car._id });
+        if ((isLike === null || isLike === void 0 ? void 0 : isLike.length) == 0) {
+            // Stwórz dokument Like
+            const newLike = new Likes({
+                _id: new mongoose_1.default.Types.ObjectId(),
+                user_liked_id: user_db._id,
+                car_liking: car._id,
+            });
+            res.json({ message: "Lajk dodany.", car });
+            yield newLike.save();
+        }
+        else {
+            res.json({ message: "lajk już był dodany!" });
+        }
     }
     catch (err) {
         console.error(err);
         res.status(500).send({ message: "Wystąpił błąd.", error: err.message });
+    }
+}));
+app.get("/check_if_user_like_car", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _f, _g, _h;
+    const userId = (_f = req.decodedToken) === null || _f === void 0 ? void 0 : _f.user_id;
+    const carId = (_g = req === null || req === void 0 ? void 0 : req.query) === null || _g === void 0 ? void 0 : _g.carId;
+    if (typeof carId == 'string' && typeof userId == 'string') {
+        try {
+            const user = yield User.find({ uid: userId });
+            const isLike = yield Likes.find({ user_liked_id: (_h = user === null || user === void 0 ? void 0 : user[0]) === null || _h === void 0 ? void 0 : _h._id, car_liking: carId });
+            if ((isLike === null || isLike === void 0 ? void 0 : isLike.length) > 0)
+                res.send(true);
+            else
+                res.send(false);
+        }
+        catch (err) {
+            console.error(err);
+            res.status(500).send({ message: "Wystapil blad", err: err.message });
+        }
     }
 }));
 app.listen(process.env.PORT, () => {

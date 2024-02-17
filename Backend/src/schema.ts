@@ -59,7 +59,7 @@ const Media_schema = new mongoose.Schema({
 const Likes_schema = new mongoose.Schema({
   id: mongoose.Schema.Types.ObjectId,
   user_liked_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  car_likeing: { type: mongoose.Schema.Types.ObjectId, ref: 'Car' },
+  car_liking: { type: mongoose.Schema.Types.ObjectId, ref: 'Car' },
   //like_type_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Likes_type' },
   //date_time: { type: Date, default: Date.now },
 }, { timestamps: true })

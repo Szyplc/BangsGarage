@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 import "./Slajder.css";
 //import "swiper/swiper-bundle.min.css";
@@ -13,28 +13,30 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { getUser } from "../../Store/authSlice";
 import { AppDispatch } from "../../Store/store";
-import { CarsToShow, getCarToShow, setCarToShowIndex } from "../../Store/carSlice";
+import { CarToShowIndex, CarsToShow, getCarToShow, setCarToShowIndex } from "../../Store/carSlice";
 import SwiperWithMedia from "../SwiperWithMedia/SwiperWithMedia";
 
 const Slajder: React.FC = () => {
-  const [index, setIndex] = useState(1);
-  const user = useSelector(getUser)
   const dispatch = useDispatch<AppDispatch>()
+  const carToShowIndex = useSelector(CarToShowIndex)
   const carsToShow = useSelector(CarsToShow)
   const handleSlideChange = async (swiper: SwiperClass) => {
-    if(index < swiper.activeIndex + 1)
-      setIndex(swiper.activeIndex + 1)
+    dispatch(setCarToShowIndex(swiper.activeIndex))
   };
 
   useEffect(() => {
-    dispatch(getCarToShow(0))
-    dispatch(getCarToShow(index))
+    const asyncFunction = async () => {
+      dispatch(getCarToShow(0))
+      dispatch(getCarToShow(1))
+    }
+    asyncFunction()
   }, []);
 
   useEffect(() => {
-    setCarToShowIndex(index)
-    dispatch(getCarToShow(index))
-  }, [index])
+    if(carToShowIndex >= CarsToShow.length) {
+      dispatch(getCarToShow(carToShowIndex + 1))
+    }
+  }, [carToShowIndex])
 
   const { heartColor, setHeartColor } = useContext(DoubleClickEvent);
   //Normalne dane każde serce generowane osobno do każdego slajda
