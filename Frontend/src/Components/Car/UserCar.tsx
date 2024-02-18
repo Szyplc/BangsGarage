@@ -2,24 +2,18 @@ import React, { useEffect } from "react";
 import "./UserCar.css"
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { CarsData, loadCarsData, setCarById } from "../../Store/carSlice";
+import { CarsData, LikedCars, loadCarsData, setCarById } from "../../Store/carSlice";
 import { AppDispatch } from "../../Store/store";
+import { CarData } from "../../../../types/types";
 
-const UserCar: React.FC = () => {
+const UserCar = ({ type }: { type: string }) => {
     const dispatch = useDispatch<AppDispatch>();
-
-    const cars = useSelector(CarsData)
-    useEffect(() => {
-        const asyncFunction = async () => {
-            if(!cars.length)
-                dispatch(loadCarsData())
-            dispatch(setCarById(""))
-        }
-        asyncFunction()
-    }, [])
-
+    let cars: CarData[];
+    if(type == "liked")
+        cars = useSelector(CarsData)
+    else
+        cars = useSelector(LikedCars)
     const navigate = useNavigate();
-
 
     const onCarClick = async (index: number) => {
         dispatch(setCarById(cars?.[index]?._id || ""))

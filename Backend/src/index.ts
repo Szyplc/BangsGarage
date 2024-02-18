@@ -602,7 +602,7 @@ app.get("/get_liked_cars", async (req, res) => {
     if(typeof userId == 'string') {
       const user = await User.findOne({ uid: userId })
       const likes = await Likes.find({ user_liked_id: user?._id })
-      const arrayOfCarId: string[] = likes.map(obj => obj._id)
+      const arrayOfCarId: string[] = likes.map(obj => obj.car_liking)
       res.send(arrayOfCarId)
     }
   } catch (err) {

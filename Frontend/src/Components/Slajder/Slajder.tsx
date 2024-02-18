@@ -34,9 +34,6 @@ const Slajder: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    console.log("-----------------------")
-    console.log("carToShowIndex: ", carToShowIndex)
-    console.log("CarsToShow length: ", carsToShow.length)
     if(carToShowIndex >= (carsToShow.length - 2)) {
       dispatch(getCarToShow(carsToShow.length))
     }

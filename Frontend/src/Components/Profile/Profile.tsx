@@ -11,6 +11,9 @@ import { ref, deleteObject } from "firebase/storage";
 import { storage } from "../../base";
 import axios from "axios";
 import UserCar from "../Car/UserCar";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "../../Store/store";
+import { CarsData, getLikedCars, loadCarsData, setCarById } from "../../Store/carSlice";
 
 const Profile = () => {
   const location = useLocation();
@@ -38,6 +41,8 @@ const Profile = () => {
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
 
+  const dispatch = useDispatch<AppDispatch>()
+  const cars = useSelector(CarsData)
   const navigate = useNavigate();
 
   const { heartColor, setHeartColor } = useContext(DoubleClickEvent);
@@ -63,6 +68,15 @@ const Profile = () => {
       .catch((error) => {
         console.error("Wystąpił błąd:", error);
       });
+
+      const asyncFunction = async () => {
+        dispatch(getLikedCars())
+          if(!cars.length)
+              dispatch(loadCarsData())
+          dispatch(setCarById(""))
+      }
+      asyncFunction()
+
   }, []);
 
   const handleSwipe = (event: any) => {
@@ -132,7 +146,7 @@ const Profile = () => {
           </p>
         </div>
       </div>
-      <UserCar />
+      <UserCar type="liked" />
     </div>
   );
 };

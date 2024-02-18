@@ -28,8 +28,10 @@ export const getLikedCars = createAsyncThunk<CarData[]>(
   "car/getLikedCars",
   async () => {
     const arrayLikedCars: string[] = (await axios.get("http://127.0.0.1:3000/get_liked_cars")).data
-    
-    return []
+    console.log(arrayLikedCars)
+    const likedCars: CarData[] = await loadCarsDataFunction(arrayLikedCars)
+    console.log(likedCars)
+    return likedCars
   }
 )
 
@@ -96,6 +98,7 @@ export const getCarData = createAsyncThunk<CarData | null, string>(
 const loadCarsDataFunction = async (cars_id: string[]): Promise<CarData[]> => {
   const carsDataPromises = cars_id.map(async (car_id) => {
     try {
+      console.log(car_id)
       const response = await axios.get<CarData>(`http://127.0.0.1:3000/getCarData`, {
         params: { car_id }
       });
@@ -211,6 +214,9 @@ export const carSlice = createSlice({
           state.carsToShow.push(action.payload.car) 
           state.likesToShow.push(action.payload.isLike)
         }
+    }),
+    builder.addCase(getLikedCars.fulfilled, (state, action) => {
+      state.likedCars = action.payload
     })
   },
 });
@@ -221,6 +227,7 @@ export const Car = ( state: RootState ) => state.car.carData
 export const CarsToShow = ( state: RootState ) => state.car.carsToShow
 export const CarToShowIndex = ( state: RootState ) => state.car.carToShowIndex
 export const LikesToShow = ( state: RootState ) => state.car.likesToShow
+export const LikedCars = ( state: RootState ) => state.car.likedCars
 
 export const { setCarsId, setCarByCar, setCarById, setCarToShowIndex } = carSlice.actions;
 

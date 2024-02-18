@@ -555,7 +555,7 @@ app.get("/get_liked_cars", (req, res) => __awaiter(void 0, void 0, void 0, funct
         if (typeof userId == 'string') {
             const user = yield User.findOne({ uid: userId });
             const likes = yield Likes.find({ user_liked_id: user === null || user === void 0 ? void 0 : user._id });
-            const arrayOfCarId = likes.map(obj => obj._id);
+            const arrayOfCarId = likes.map(obj => obj.car_liking);
             res.send(arrayOfCarId);
         }
     }
