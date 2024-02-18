@@ -535,10 +535,9 @@ app.get("/getCarToSlider", async (req, res) => {
   }
 })
 
-app.post("/give_like_to_car", async (req, res): Promise<void> => {
+app.post("/toggle_like_to_car", async (req, res): Promise<void> => {
   const userId: string = req.decodedToken?.user_id;
   const carId: string = req?.body?.carId;
-
   try {
     // Znajdź użytkownika w bazie danych
     const user_db = await User.findOne({ uid: userId });
@@ -547,8 +546,8 @@ app.post("/give_like_to_car", async (req, res): Promise<void> => {
       return;
     }
 
-    // Zwiększ licznik polubień w Car
-    const car: CarData | null = await Car.findByIdAndUpdate(carId, { $inc: { likes_count: 1 } }, { new: true });///////////////
+    const car: CarData | null = await Car.findOne({ _id: carId })
+    
     if (!car) {
       res.status(404).send({ message: "Nie znaleziono samochodu." });
       return;
@@ -556,18 +555,21 @@ app.post("/give_like_to_car", async (req, res): Promise<void> => {
     //Sprawdź czy like jest już dodany
     const isLike = await Likes.find({ user_liked_id: user_db._id, car_liking: car._id })
     if(isLike?.length == 0) {
-
+      console.log(car._id)
       // Stwórz dokument Like
       const newLike = new Likes({
         _id: new mongoose.Types.ObjectId(),
         user_liked_id: user_db._id,
         car_liking: car._id,
       });
-
-      res.json({ message: "Lajk dodany.", car });
+      await Car.findByIdAndUpdate(carId, { $inc: { likes_count: 1 } }, { new: true });///////////////
+    
       await newLike.save();
+      res.json({ message: "Lajk dodany.", inc: 1 });
     } else {
-      res.json({ message: "lajk już był dodany!" })
+      await Likes.deleteOne({ user_liked_id: user_db._id, car_liking: car._id })
+      await Car.findByIdAndUpdate(carId, { $inc: { likes_count: -1 } }, { new: true });
+      res.json({ message: "lajk odjety", inc: -1 })
     }
 
   } catch (err: any) {
@@ -581,8 +583,8 @@ app.get("/check_if_user_like_car", async (req, res) => {
   const carId: string = req?.query?.carId as string;
   if(typeof carId == 'string' && typeof userId == 'string') {
     try {
-      const user = await User.find({ uid: userId })
-      const isLike = await Likes.find({ user_liked_id: user?.[0]?._id, car_liking: carId })
+      const user = await User.findOne({ uid: userId })
+      const isLike = await Likes.find({ user_liked_id: user?._id, car_liking: carId })
       if (isLike?.length > 0)
         res.send(true)
       else 
@@ -594,6 +596,20 @@ app.get("/check_if_user_like_car", async (req, res) => {
   }
 })
 
-app.listen(process.env.PORT, () => {
+app.get("/get_liked_cars", async (req, res) => {
+  const userId: string = req.decodedToken?.user_id
+  try {
+    if(typeof userId == 'string') {
+      const user = await User.findOne({ uid: userId })
+      const likes = await Likes.find({ user_liked_id: user?._id })
+      const arrayOfCarId: string[] = likes.map(obj => obj._id)
+      res.send(arrayOfCarId)
+    }
+  } catch (err) {
+    
+  }
+})
+
+app.listen(3000, () => {
   console.log('Serwer nasłuchuje na porcie 3000');
 });

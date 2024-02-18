@@ -10,6 +10,8 @@ interface CarState {
   carsData: CarData[];
   carsToShow: CarData[];
   carToShowIndex: number;
+  likesToShow: boolean[];
+  likedCars: CarData[];
 }
 
 const initialState: CarState = {
@@ -18,22 +20,44 @@ const initialState: CarState = {
   carsData: [],
   carsToShow: [],
   carToShowIndex: 0,
+  likesToShow: [],
+  likedCars: []
 };
 
-export const getCarToShow = createAsyncThunk<CarData | null, number>(
+export const getLikedCars = createAsyncThunk<CarData[]>(
+  "car/getLikedCars",
+  async () => {
+    const arrayLikedCars: string[] = (await axios.get("http://127.0.0.1:3000/get_liked_cars")).data
+    
+    return []
+  }
+)
+
+
+const getCarToShowFunction = async (index: number): Promise<{ car: CarData, isLike: boolean } | null> => {
+  const newCar = await (await axios.get("http://127.0.0.1:3000/getCarToSlider", { params: { index: index }})).data as CarData// | null
+  if(newCar) {
+    for(const [index, media] of newCar.media.entries()) {
+        const fullUrl = await convertUrlToFullUrl(media.url)
+        newCar.media[index] = { ...media, fullUrl: fullUrl }
+    }
+    const carProfileFullUrl = newCar.media.find(obj => obj.profile === true)?.url
+    newCar.profileUrl = carProfileFullUrl ? await convertUrlToFullUrl(carProfileFullUrl) : "";
+    let isLike = (await axios.get("http://127.0.0.1:3000/check_if_user_like_car", 
+      { params: { carId: newCar._id }})).data
+    if(typeof isLike != 'boolean')
+      isLike = false
+    return { car: newCar, isLike: isLike }
+  } else 
+    return null
+}
+
+export const getCarToShow = createAsyncThunk<{ car: CarData, isLike: boolean } | null, number>(
   "car/getCarToShow",
-  async (index, { rejectWithValue, }) => {
+  async (index, { rejectWithValue }) => {
     try {
-      const newCar = await (await axios.get("http://127.0.0.1:3000/getCarToSlider", { params: { index: index }})).data as CarData// | null
-      if(newCar) {
-        for(const [index, media] of newCar.media.entries()) {
-            const fullUrl = await convertUrlToFullUrl(media.url)
-            newCar.media[index] = { ...media, fullUrl: fullUrl }
-        }
-        const carProfileFullUrl = newCar.media.find(obj => obj.profile === true)?.url
-        newCar.profileUrl = carProfileFullUrl ? await convertUrlToFullUrl(carProfileFullUrl) : ""
-        return newCar;
-      }
+        const returnValue = await getCarToShowFunction(index)
+        return returnValue;
     } catch (err) {
       rejectWithValue(null)
     }
@@ -69,6 +93,36 @@ export const getCarData = createAsyncThunk<CarData | null, string>(
   }
 );
 
+const loadCarsDataFunction = async (cars_id: string[]): Promise<CarData[]> => {
+  const carsDataPromises = cars_id.map(async (car_id) => {
+    try {
+      const response = await axios.get<CarData>(`http://127.0.0.1:3000/getCarData`, {
+        params: { car_id }
+      });
+      const carData = response.data as CarData | undefined;
+      if (!carData) return null;
+
+      const updatedMedia = await Promise.all(carData.media.map(async media => ({
+        ...media,
+        fullUrl: await convertUrlToFullUrl(media.url)
+      })));
+
+      //domyślne zdjęcie url może uledz zmianie
+      const profileUrl = updatedMedia.find(m => m.profile)?.fullUrl 
+      || 'https://firebasestorage.googleapis.com/v0/b/bangsgarage.appspot.com/o/config%2Fdefault_car.png?alt=media&token=2ae582b6-ad31-4987-8f6c-39114743aa64';
+      
+      return { ...carData, media: updatedMedia, profileUrl };
+    } catch (error) {
+      console.error(`Błąd podczas ładowania danych samochodu o ID ${car_id}:`, error);
+      return null;
+    }
+  });
+
+  let carsData = await Promise.all(carsDataPromises) as CarData[];
+  carsData = carsData.filter((car) => car !== null);
+  return carsData
+}
+
 export const loadCarsData = createAsyncThunk<CarData[], void, { state: RootState }>(
     'car/loadCarsData',
     async (_, { getState, dispatch, rejectWithValue }) => {
@@ -80,31 +134,7 @@ export const loadCarsData = createAsyncThunk<CarData[], void, { state: RootState
           console.error("Brak cars_id w stanie.");
           return [];
         }
-  
-        const carsDataPromises = cars_id.map(async (car_id) => {
-          try {
-            const carData = await dispatch(getCarData(car_id)).unwrap() as CarData | null;
-            if (!carData) return null;
-  
-            const updatedMedia = await Promise.all(carData.media.map(async media => ({
-              ...media,
-              fullUrl: await convertUrlToFullUrl(media.url)
-            })));
-
-            //domyślne zdjęcie url może uledz zmianie
-            const profileUrl = updatedMedia.find(m => m.profile)?.fullUrl 
-            || 'https://firebasestorage.googleapis.com/v0/b/bangsgarage.appspot.com/o/config%2Fdefault_car.png?alt=media&token=2ae582b6-ad31-4987-8f6c-39114743aa64';
-            
-            return { ...carData, media: updatedMedia, profileUrl };
-          } catch (error) {
-            console.error(`Błąd podczas ładowania danych samochodu o ID ${car_id}:`, error);
-            return null;
-          }
-        });
-  
-        let carsData = await Promise.all(carsDataPromises);
-        carsData = carsData.filter((car) => car !== null);
-
+        const carsData: CarData[] = await loadCarsDataFunction(cars_id)
         if (!carsData.length) {
           return [];
         }
@@ -177,8 +207,10 @@ export const carSlice = createSlice({
     }),
     builder.addCase(getCarToShow.fulfilled, (state, action) => {
       if(action.payload != null)
-        if (!state.carsToShow.find(car => car._id === action.payload?._id))
-          state.carsToShow.push(action.payload) 
+        if (!state.carsToShow.find(car => car._id === action.payload!.car?._id)) {
+          state.carsToShow.push(action.payload.car) 
+          state.likesToShow.push(action.payload.isLike)
+        }
     })
   },
 });
@@ -187,7 +219,8 @@ export const CarsId = ( state: RootState ) => state.car.cars_id;
 export const CarsData = ( state: RootState ) => state.car.carsData;
 export const Car = ( state: RootState ) => state.car.carData
 export const CarsToShow = ( state: RootState ) => state.car.carsToShow
-export const CarToShowIndex = (state: RootState ) => state.car.carToShowIndex
+export const CarToShowIndex = ( state: RootState ) => state.car.carToShowIndex
+export const LikesToShow = ( state: RootState ) => state.car.likesToShow
 
 export const { setCarsId, setCarByCar, setCarById, setCarToShowIndex } = carSlice.actions;
 

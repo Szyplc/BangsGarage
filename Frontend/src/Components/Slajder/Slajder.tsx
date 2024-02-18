@@ -28,13 +28,17 @@ const Slajder: React.FC = () => {
     const asyncFunction = async () => {
       dispatch(getCarToShow(0))
       dispatch(getCarToShow(1))
+      dispatch(getCarToShow(2))
     }
     asyncFunction()
   }, []);
 
   useEffect(() => {
-    if(carToShowIndex >= CarsToShow.length) {
-      dispatch(getCarToShow(carToShowIndex + 1))
+    console.log("-----------------------")
+    console.log("carToShowIndex: ", carToShowIndex)
+    console.log("CarsToShow length: ", carsToShow.length)
+    if(carToShowIndex >= (carsToShow.length - 2)) {
+      dispatch(getCarToShow(carsToShow.length))
     }
   }, [carToShowIndex])
 

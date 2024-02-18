@@ -488,7 +488,7 @@ app.get("/getCarToSlider", (req, res) => __awaiter(void 0, void 0, void 0, funct
         res.status(500).send({ message: "Wystąpił błąd podczas wyszukiwania samochodu." });
     }
 }));
-app.post("/give_like_to_car", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.post("/toggle_like_to_car", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _d, _e;
     const userId = (_d = req.decodedToken) === null || _d === void 0 ? void 0 : _d.user_id;
     const carId = (_e = req === null || req === void 0 ? void 0 : req.body) === null || _e === void 0 ? void 0 : _e.carId;
@@ -499,8 +499,7 @@ app.post("/give_like_to_car", (req, res) => __awaiter(void 0, void 0, void 0, fu
             res.status(404).send({ message: "Nie znaleziono użytkownika." });
             return;
         }
-        // Zwiększ licznik polubień w Car
-        const car = yield Car.findByIdAndUpdate(carId, { $inc: { likes_count: 1 } }, { new: true }); ///////////////
+        const car = yield Car.findOne({ _id: carId });
         if (!car) {
             res.status(404).send({ message: "Nie znaleziono samochodu." });
             return;
@@ -508,17 +507,21 @@ app.post("/give_like_to_car", (req, res) => __awaiter(void 0, void 0, void 0, fu
         //Sprawdź czy like jest już dodany
         const isLike = yield Likes.find({ user_liked_id: user_db._id, car_liking: car._id });
         if ((isLike === null || isLike === void 0 ? void 0 : isLike.length) == 0) {
+            console.log(car._id);
             // Stwórz dokument Like
             const newLike = new Likes({
                 _id: new mongoose_1.default.Types.ObjectId(),
                 user_liked_id: user_db._id,
                 car_liking: car._id,
             });
-            res.json({ message: "Lajk dodany.", car });
+            yield Car.findByIdAndUpdate(carId, { $inc: { likes_count: 1 } }, { new: true }); ///////////////
             yield newLike.save();
+            res.json({ message: "Lajk dodany.", inc: 1 });
         }
         else {
-            res.json({ message: "lajk już był dodany!" });
+            yield Likes.deleteOne({ user_liked_id: user_db._id, car_liking: car._id });
+            yield Car.findByIdAndUpdate(carId, { $inc: { likes_count: -1 } }, { new: true });
+            res.json({ message: "lajk odjety", inc: -1 });
         }
     }
     catch (err) {
@@ -527,13 +530,13 @@ app.post("/give_like_to_car", (req, res) => __awaiter(void 0, void 0, void 0, fu
     }
 }));
 app.get("/check_if_user_like_car", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _f, _g, _h;
+    var _f, _g;
     const userId = (_f = req.decodedToken) === null || _f === void 0 ? void 0 : _f.user_id;
     const carId = (_g = req === null || req === void 0 ? void 0 : req.query) === null || _g === void 0 ? void 0 : _g.carId;
     if (typeof carId == 'string' && typeof userId == 'string') {
         try {
-            const user = yield User.find({ uid: userId });
-            const isLike = yield Likes.find({ user_liked_id: (_h = user === null || user === void 0 ? void 0 : user[0]) === null || _h === void 0 ? void 0 : _h._id, car_liking: carId });
+            const user = yield User.findOne({ uid: userId });
+            const isLike = yield Likes.find({ user_liked_id: user === null || user === void 0 ? void 0 : user._id, car_liking: carId });
             if ((isLike === null || isLike === void 0 ? void 0 : isLike.length) > 0)
                 res.send(true);
             else
@@ -545,6 +548,20 @@ app.get("/check_if_user_like_car", (req, res) => __awaiter(void 0, void 0, void 
         }
     }
 }));
-app.listen(process.env.PORT, () => {
+app.get("/get_liked_cars", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _h;
+    const userId = (_h = req.decodedToken) === null || _h === void 0 ? void 0 : _h.user_id;
+    try {
+        if (typeof userId == 'string') {
+            const user = yield User.findOne({ uid: userId });
+            const likes = yield Likes.find({ user_liked_id: user === null || user === void 0 ? void 0 : user._id });
+            const arrayOfCarId = likes.map(obj => obj._id);
+            res.send(arrayOfCarId);
+        }
+    }
+    catch (err) {
+    }
+}));
+app.listen(3000, () => {
     console.log('Serwer nasłuchuje na porcie 3000');
 });

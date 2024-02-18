@@ -19,5 +19,8 @@
   "homepage": "https://github.com/Szyplc/BangsGarage#readme",
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.4"
   }
 }
