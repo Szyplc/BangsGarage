@@ -524,7 +524,8 @@ app.get("/getCarToSlider", async (req, res) => {
     const carAtIndex = cars[index];
 
     if (!carAtIndex) {
-      return res.status(404).send({ message: "Nie znaleziono samochodu na podanym indeksie." });
+      return res.send(null)
+      //return res.status(404).send({ message: "Nie znaleziono samochodu na podanym indeksie." });
     }
 
     // Zwróć znaleziony samochód

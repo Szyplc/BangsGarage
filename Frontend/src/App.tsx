@@ -25,6 +25,7 @@ import { auth } from "./base";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "./Store/store";
 import { getIsAuthenticated, signIn, signOut } from "./Store/authSlice";
+import { CarsData, getLikedCars, loadCarsData, setCarById } from "./Store/carSlice";
 
 export const DoubleClickEvent = createContext<{
   heartColor: string;
@@ -38,6 +39,7 @@ const App: React.FC = () => {
   const [heartColor, setHeartColor] = useState("#ffffff");
   const isAuthenticated = useSelector(getIsAuthenticated);
   const dispatch = useDispatch<AppDispatch>()
+  const cars = useSelector(CarsData)
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
 
@@ -61,6 +63,7 @@ const App: React.FC = () => {
           dispatch(signOut())
         }
       });
+
     };
   
     asyncFunction();
@@ -86,7 +89,7 @@ const App: React.FC = () => {
                   <>
                     <Route path="/slajder" element={<Slajder />} />
                     <Route path="/messages" element={<Messages />} />
-                    <Route path="/search" element={<Search />} />
+                    <Route path="/liked_cars" element={<Profile />} />
                     <Route path="/requests" element={<Requests />} />
                     <Route path="/chat" element={<Chat />} />
                     <Route path="/surveys" element={<QuestionForm />} />

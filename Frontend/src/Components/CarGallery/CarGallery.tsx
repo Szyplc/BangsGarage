@@ -9,7 +9,7 @@ import "./CarGallery.css"
 import { storage } from "../../base"
 import { useNavigate } from "react-router-dom";
 import axios, { AxiosError } from "axios";
-import { Car, loadCarsData, setCarByCar, setCarById } from "../../Store/carSlice";
+import { Car, CarsData, loadCarsData, setCarByCar, setCarById } from "../../Store/carSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { getUser } from "../../Store/authSlice";
 import { AppDispatch } from "../../Store/store";
@@ -20,13 +20,17 @@ const CarGallery = () => {
     const car = useSelector(Car)
     const user = useSelector(getUser)
     const dispatch = useDispatch<AppDispatch>()
-
+    const cars = useSelector(CarsData)
+    //check if it is your car
+    const result = cars.find(c => c._id == car?._id)
+    const [isYourCar, setIsYourCar] = useState<boolean>(Boolean(result))
     const [selectedPhoto, setSelectedPhoto] = useState<string>("")
     const [currentIndex, setCurrentIndex] = useState(0);
     const fileInputRef = useRef<HTMLInputElement>(null)
     const navigate = useNavigate();
     
     useEffect(() => {
+        console.log(car)
         if(!car)
             navigate("/profile")
     }, [])
@@ -98,7 +102,7 @@ const CarGallery = () => {
         <div className="container" style={{ display: "block", height: "initial"}}>
             <div>
                 <button onClick={undo}>Cofnij</button>
-                <button style={{ float: "right"}} onClick={goConfig}>Config</button>
+                { isYourCar && <button style={{ float: "right"}} onClick={goConfig}>Config</button> }
             </div>
         <Swiper
         modules={[Navigation, Pagination, EffectFade]}
@@ -117,13 +121,13 @@ const CarGallery = () => {
                     </div></SwiperSlide>
             ))}
         </Swiper>
-        <div>
+        { isYourCar && <div>
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoChange} />
                 <img src={selectedPhoto} alt="Tutaj będzie twoje wybrane zdjęcie" 
                     style={{ maxWidth: '100%', height: 'auto' }} />
                 <button onClick={addPhoto}>Dodaj</button>
                 <button onClick={deleteButton}>Usun</button>
-            </div>
+            </div> }
         </div>
     )
   );

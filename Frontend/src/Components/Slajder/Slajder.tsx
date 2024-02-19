@@ -15,6 +15,7 @@ import { getUser } from "../../Store/authSlice";
 import { AppDispatch } from "../../Store/store";
 import { CarToShowIndex, CarsToShow, getCarToShow, setCarToShowIndex } from "../../Store/carSlice";
 import SwiperWithMedia from "../SwiperWithMedia/SwiperWithMedia";
+import { CarData } from "../../../../types/types";
 
 const Slajder: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>()
@@ -48,25 +49,22 @@ const Slajder: React.FC = () => {
   const classes = useStyles(); // Inicjalizacja stylów
 
   return (
-    <div>
-    {/*carsToShow[0]?.media && <SwiperWithMedia mediaProp={carsToShow[0]?.media}></SwiperWithMedia>*/}
       <Swiper
         className="swiper-container"
         spaceBetween={50}
         slidesPerView={1}
         direction="vertical"
         onSlideChange={handleSlideChange}
-        style={{ backgroundColor: "rebeccapurple"}}
+        style={{ backgroundColor: "#2f0000"}}
       >
         
-        {carsToShow.map((item: any) => (
+        {carsToShow.map((item: CarData, index: number) => (
           <SwiperSlide key={item._id}>
-            <SideMenu heartColorProp={heartColor}></SideMenu>
-            <SwiperWithMedia mediaProp={item.media}></SwiperWithMedia>
+            <SwiperWithMedia mediaProp={item.media} index={index}>
+            </SwiperWithMedia>
           </SwiperSlide>
         ))}
       </Swiper>
-        </div>
   );
 };
 

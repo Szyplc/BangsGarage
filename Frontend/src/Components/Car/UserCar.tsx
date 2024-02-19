@@ -2,16 +2,16 @@ import React, { useEffect } from "react";
 import "./UserCar.css"
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { CarsData, LikedCars, loadCarsData, setCarById } from "../../Store/carSlice";
+import { CarsData, LikedCars, setCarById } from "../../Store/carSlice";
 import { AppDispatch } from "../../Store/store";
 import { CarData } from "../../../../types/types";
 
 const UserCar = ({ type }: { type: string }) => {
     const dispatch = useDispatch<AppDispatch>();
     let cars: CarData[] = [];
-    if(type == "profile")
+    if(type == "/profile")
         cars = useSelector(CarsData)
-    else if(type == "liked")
+    else if(type == "/liked_cars")
         cars = useSelector(LikedCars)
     const navigate = useNavigate();
 

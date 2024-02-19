@@ -1,30 +1,25 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { useStyles } from "../style";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Heart from "./SideMenuComponents/Heart";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Car, CarToShowIndex, CarsToShow, LikesToShow } from "../Store/carSlice";
+import { Car, CarToShowIndex, CarsToShow, LikesToShow, setCarByCar } from "../Store/carSlice";
 import { getUser } from "../Store/authSlice";
 import axios from "axios";
 import { AppDispatch, RootState } from "../Store/store";
 
-interface SideMenuProps {
-  showProfile?: boolean;
-  heartColorProp?: string;
-}
-
-const SideMenu: React.FC<SideMenuProps> = ({showProfile = true, heartColorProp = "#ffffff"}) => {
+const SideMenu = ({ indexMenu } : { indexMenu: number }) => {
   const classes = useStyles();
+  const navigate = useNavigate();
   const user = useSelector(getUser)
-  const car = useSelector(Car)
   const index = useSelector(CarToShowIndex)
   const carsToShow = useSelector(CarsToShow)
   const likesToShow = useSelector(LikesToShow)
-  
-  const [heartColor, setHeartColor] = useState(heartColorProp);
+  const [heartColor, setHeartColor] = useState("#ffffff");
   const [increment, setIncrement] = useState<number>(0)
+  const dispatch = useDispatch<AppDispatch>()
 
   const toggleHeartColor = () => {
     if(heartColor == "#ff0000") {
@@ -44,18 +39,21 @@ const SideMenu: React.FC<SideMenuProps> = ({showProfile = true, heartColorProp =
   };
 
   useEffect(() => {
-      if(likesToShow[index]) 
+      if(likesToShow[indexMenu]) 
         setHeartColor("#ff0000")
       else 
         setHeartColor("#ffffff")
-  }, [index])
+  }, [])
+
+  const onProfileClick = () => {
+    dispatch(setCarByCar(carsToShow[index]))
+    navigate("/carGallery")
+  }
 
   return (
     <div className={classes.iconOverlay_profile}>
-      <Link to="/profile" state={{isYourProfile: false}}>
-        <FontAwesomeIcon icon={faUser} className={classes.profil} visibility={showProfile ? "visible": "hidden"}/>
-      </Link>
-      <div onClick={handleHeartClick}><Heart fillColor={heartColorProp == "#ffffff" ? heartColor : heartColorProp }/></div>
+      <FontAwesomeIcon icon={faUser} className={classes.profil} visibility={true ? "visible": "hidden"} onClick={onProfileClick}/>
+      <div onClick={handleHeartClick}><Heart fillColor={ heartColor }/></div>
       <div style={{ textAlign: "center", color: "white"}}>{ carsToShow?.[index]?.likes_count + increment }</div>
     </div>
   );

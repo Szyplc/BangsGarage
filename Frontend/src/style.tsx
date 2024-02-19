@@ -24,7 +24,7 @@ export const useStyles = makeStyles(() => ({
     fontSize: "24px",
   },
   iconOverlay_profile: {
-    position: "fixed",
+    position: "absolute",
     top: 0,
     left: 0,
     zIndex: 2,

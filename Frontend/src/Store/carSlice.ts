@@ -28,16 +28,14 @@ export const getLikedCars = createAsyncThunk<CarData[]>(
   "car/getLikedCars",
   async () => {
     const arrayLikedCars: string[] = (await axios.get("http://127.0.0.1:3000/get_liked_cars")).data
-    console.log(arrayLikedCars)
     const likedCars: CarData[] = await loadCarsDataFunction(arrayLikedCars)
-    console.log(likedCars)
     return likedCars
   }
 )
 
 
 const getCarToShowFunction = async (index: number): Promise<{ car: CarData, isLike: boolean } | null> => {
-  const newCar = await (await axios.get("http://127.0.0.1:3000/getCarToSlider", { params: { index: index }})).data as CarData// | null
+  const newCar = await (await axios.get("http://127.0.0.1:3000/getCarToSlider", { params: { index: index }})).data as CarData | null
   if(newCar) {
     for(const [index, media] of newCar.media.entries()) {
         const fullUrl = await convertUrlToFullUrl(media.url)
@@ -98,7 +96,6 @@ export const getCarData = createAsyncThunk<CarData | null, string>(
 const loadCarsDataFunction = async (cars_id: string[]): Promise<CarData[]> => {
   const carsDataPromises = cars_id.map(async (car_id) => {
     try {
-      console.log(car_id)
       const response = await axios.get<CarData>(`http://127.0.0.1:3000/getCarData`, {
         params: { car_id }
       });
@@ -130,7 +127,7 @@ export const loadCarsData = createAsyncThunk<CarData[], void, { state: RootState
     'car/loadCarsData',
     async (_, { getState, dispatch, rejectWithValue }) => {
       try {
-        await dispatch(getCarsId());
+        await dispatch(getCarsId()).unwrap();
         let cars_id = getState().car.cars_id;
   
         if (!cars_id.length) {
@@ -174,9 +171,12 @@ export const carSlice = createSlice({
     },
     setCarById: (state, action: PayloadAction<string>) => {
         const car = state.carsData?.find(car => car._id == action.payload) as CarData || undefined
+        const liked_car = state.likedCars?.find(car => car._id == action.payload) as CarData || undefined
         if(car)
             state.carData = car
-        else 
+        else if(liked_car)
+            state.carData = liked_car
+        else
             state.carData = null
     },
     setCarByCar: (state, action: PayloadAction<CarData>) => {

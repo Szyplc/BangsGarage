@@ -18,6 +18,7 @@ import { CarsData, getLikedCars, loadCarsData, setCarById } from "../../Store/ca
 const Profile = () => {
   const location = useLocation();
   const [photos, setPhotos] = useState([]);
+  const url = location.pathname
   const get_photos = async () => {
     axios
       .get("http://127.0.0.1:3000/get_photos_from_gallery", {
@@ -68,14 +69,11 @@ const Profile = () => {
       .catch((error) => {
         console.error("Wystąpił błąd:", error);
       });
-
-      const asyncFunction = async () => {
-        dispatch(getLikedCars())
-          if(!cars.length)
-              dispatch(loadCarsData())
-          dispatch(setCarById(""))
-      }
-      asyncFunction()
+      
+      dispatch(getLikedCars())
+      if(!cars.length)
+          dispatch(loadCarsData())
+      dispatch(setCarById(""))
 
   }, []);
 
@@ -146,7 +144,7 @@ const Profile = () => {
           </p>
         </div>
       </div>
-      <UserCar type="profile" />
+      <UserCar type={url} />
     </div>
   );
 };

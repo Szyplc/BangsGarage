@@ -478,7 +478,8 @@ app.get("/getCarToSlider", (req, res) => __awaiter(void 0, void 0, void 0, funct
         // Wybierz samochód na pozycji index-1 (ponieważ tablice są indeksowane od 0)
         const carAtIndex = cars[index];
         if (!carAtIndex) {
-            return res.status(404).send({ message: "Nie znaleziono samochodu na podanym indeksie." });
+            return res.send(null);
+            //return res.status(404).send({ message: "Nie znaleziono samochodu na podanym indeksie." });
         }
         // Zwróć znaleziony samochód
         res.send(yield carAtIndex);
