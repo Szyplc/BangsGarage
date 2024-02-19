@@ -146,7 +146,7 @@ const Profile = () => {
           </p>
         </div>
       </div>
-      <UserCar type="liked" />
+      <UserCar type="profile" />
     </div>
   );
 };

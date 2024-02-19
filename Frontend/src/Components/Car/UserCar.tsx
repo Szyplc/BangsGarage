@@ -8,10 +8,10 @@ import { CarData } from "../../../../types/types";
 
 const UserCar = ({ type }: { type: string }) => {
     const dispatch = useDispatch<AppDispatch>();
-    let cars: CarData[];
-    if(type == "liked")
+    let cars: CarData[] = [];
+    if(type == "profile")
         cars = useSelector(CarsData)
-    else
+    else if(type == "liked")
         cars = useSelector(LikedCars)
     const navigate = useNavigate();
 
