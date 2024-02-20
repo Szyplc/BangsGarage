@@ -40,14 +40,6 @@ const Slajder: React.FC = () => {
     }
   }, [carToShowIndex])
 
-  const { heartColor, setHeartColor } = useContext(DoubleClickEvent);
-  //Normalne dane każde serce generowane osobno do każdego slajda
-  const handleChangeColor = () => {
-    setHeartColor("#ff0000");
-  };
-
-  const classes = useStyles(); // Inicjalizacja stylów
-
   return (
       <Swiper
         className="swiper-container"

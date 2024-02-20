@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from 'firebase/auth';
+import { GoogleAuthProvider, getAuth } from 'firebase/auth';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/storage';
 import 'firebase/compat/firestore';
@@ -19,6 +19,7 @@ const app = initializeApp(firebaseConfig);
 const inicialize = firebase.initializeApp(firebaseConfig)
 const storage = firebase.storage();
 const auth = getAuth(app);
+const provider = new GoogleAuthProvider()
 const db = firebase.firestore();
 const firestore = firebase.firestore();
 
@@ -30,4 +31,4 @@ const convertUrlToFullUrl = (url: string) => {
   return getDownloadURL(pathReference)
 }
 
-export { storage, firebase, inicialize, db, firestore, auth, convertUrlToFullUrl }
+export { storage, firebase, inicialize, db, firestore, auth, convertUrlToFullUrl, provider }

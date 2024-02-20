@@ -29,35 +29,13 @@ function Login() {
   };
 
   return (
-    <div className="container">
-      <h2>Login</h2>
+    <>
       <form onSubmit={signInSubmit}>
-        <div>
-          <label htmlFor="email">Email address</label>
-          <input
-            type="email"
-            id="email"
-            placeholder="Enter email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-
-        <button type="submit">Log In</button>
+        <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="Email" style={{ marginBottom: '10px' }} />
+        <input type="password" onChange={(e) => setPassword(e.target.value)} placeholder="Password" style={{ marginBottom: '20px' }} />
+        <button type="submit" style={{ width: "-webkit-fill-available", backgroundColor: '#FFD700', padding: '10px', border: 'none', borderRadius: '5px', marginBottom: '10px' }}>Sign in</button>
       </form>
-      {errorMessage}
-    </div>
+    </>
   );
 }
 

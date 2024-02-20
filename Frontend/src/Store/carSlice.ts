@@ -192,6 +192,9 @@ export const carSlice = createSlice({
     },
     setCarToShowIndex: (state, action: PayloadAction<number>) => {
       state.carToShowIndex = action.payload
+    },
+    setInitialValue: (state) => {
+      state = initialState
     }
   },
   extraReducers: (builder) => {
@@ -229,6 +232,6 @@ export const CarToShowIndex = ( state: RootState ) => state.car.carToShowIndex
 export const LikesToShow = ( state: RootState ) => state.car.likesToShow
 export const LikedCars = ( state: RootState ) => state.car.likedCars
 
-export const { setCarsId, setCarByCar, setCarById, setCarToShowIndex } = carSlice.actions;
+export const { setCarsId, setCarByCar, setCarById, setCarToShowIndex, setInitialValue } = carSlice.actions;
 
 export default carSlice.reducer;

@@ -10,7 +10,7 @@ import { getUser } from "../Store/authSlice";
 import axios from "axios";
 import { AppDispatch, RootState } from "../Store/store";
 
-const SideMenu = ({ indexMenu } : { indexMenu: number }) => {
+const SideMenu = ({ indexMenu, isDoubleClick } : { indexMenu: number, isDoubleClick: boolean }) => {
   const classes = useStyles();
   const navigate = useNavigate();
   const user = useSelector(getUser)
@@ -31,6 +31,11 @@ const SideMenu = ({ indexMenu } : { indexMenu: number }) => {
       setIncrement(increment => increment + 1)
     }
   }
+  useEffect(() => {
+    if(!likesToShow[indexMenu] && isDoubleClick) {
+      handleHeartClick()
+    }
+  }, [isDoubleClick])
 
   const handleHeartClick = async () => {
     toggleHeartColor()

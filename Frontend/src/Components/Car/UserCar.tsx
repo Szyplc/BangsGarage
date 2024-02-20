@@ -27,8 +27,8 @@ const UserCar = ({ type }: { type: string }) => {
                     <div key={index} className="car" onClick={() => onCarClick(index)}>
                         {car.profileUrl && <img src={car.profileUrl} alt="Car" />}
                         <div className="carInfo">
-                            {index + 1}. Manufacturer: {car.Car_Specification.manufacturer}, 
-                            Model: {car.Car_Specification.model}
+                            {car.Car_Specification.manufacturer}<br/> 
+                            {car.Car_Specification.model}
                         </div>
                     </div>
                 ))}

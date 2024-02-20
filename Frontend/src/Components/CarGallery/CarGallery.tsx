@@ -15,6 +15,8 @@ import { getUser } from "../../Store/authSlice";
 import { AppDispatch } from "../../Store/store";
 import { Swiper as SwiperClass } from "swiper/types";
 import { CarData } from "../../../../types/types";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faImage, faX } from "@fortawesome/free-solid-svg-icons";
 
 const CarGallery = () => {
     const car = useSelector(Car)
@@ -104,29 +106,39 @@ const CarGallery = () => {
                 <button onClick={undo}>Cofnij</button>
                 { isYourCar && <button style={{ float: "right"}} onClick={goConfig}>Config</button> }
             </div>
-        <Swiper
-        modules={[Navigation, Pagination, EffectFade]}
-                effect="fade"
-                spaceBetween={50}
-                slidesPerView={1}
-                navigation
-                pagination={{ clickable: true }}
-                centeredSlides={true}
-                loop={true}
-                onSlideChange={handleSlideChange}
-        >
-            {car.media.map((media) => (
-                <SwiperSlide style={{ textAlign: "center"}} key={media._id}><div style={{ background: "white", height: "100%"}}>
-                    {media.fullUrl && <img style={{ objectFit: "contain" }} src={media.fullUrl} alt={media.fullUrl} /> }
-                    </div></SwiperSlide>
-            ))}
-        </Swiper>
+            <div style={{ height: "70vh" }}>
+                <Swiper
+                modules={[Navigation, Pagination, EffectFade]}
+                        effect="fade"
+                        spaceBetween={50}
+                        slidesPerView={1}
+                        navigation
+                        pagination={{ clickable: true }}
+                        centeredSlides={true}
+                        loop={true}
+                        onSlideChange={handleSlideChange}
+                >
+                    {car.media.map((media) => (
+                        <SwiperSlide style={{ textAlign: "center"}} key={media._id}><div style={{ background: "white", height: "100%"}}>
+                            {media.fullUrl && <img style={{ objectFit: "contain" }} src={media.fullUrl} alt={media.fullUrl} /> }
+                            </div></SwiperSlide>
+                    ))}
+                </Swiper>
+            </div>
         { isYourCar && <div>
-                <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoChange} />
+                <div style={{ display: "flex", justifyContent: "space-evenly" }}>
+                <div style={{ display: "contents"}}>
+                    <label htmlFor="file-input" style={{ verticalAlign: "center"}}>
+                        <FontAwesomeIcon style={{ height: "50px" }} icon={faImage} />
+                    </label>
+                    <input style={{ display: "none"}} id="file-input" ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoChange} />
+                </div>
+                <div><FontAwesomeIcon style={{ height: "50px" }} icon={faX} /></div>
+                <button disabled={selectedPhoto == ""} onClick={addPhoto}>Dodaj</button>
+                <button onClick={deleteButton}>Usun</button>
+                </div>
                 <img src={selectedPhoto} alt="Tutaj będzie twoje wybrane zdjęcie" 
                     style={{ maxWidth: '100%', height: 'auto' }} />
-                <button onClick={addPhoto}>Dodaj</button>
-                <button onClick={deleteButton}>Usun</button>
             </div> }
         </div>
     )

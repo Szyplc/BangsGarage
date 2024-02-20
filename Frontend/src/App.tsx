@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useMemo, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import "./Components/Slajder/Slajder.css";
 import "./App.css"
@@ -26,6 +26,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "./Store/store";
 import { getIsAuthenticated, signIn, signOut } from "./Store/authSlice";
 import { CarsData, getLikedCars, loadCarsData, setCarById } from "./Store/carSlice";
+import { createMyTheme } from "./theme";
+import { ThemeProvider } from "@mui/styles";
+import Auth from "./Components/Auth/Auth";
 
 export const DoubleClickEvent = createContext<{
   heartColor: string;
@@ -37,9 +40,13 @@ export const DoubleClickEvent = createContext<{
 
 const App: React.FC = () => {
   const [heartColor, setHeartColor] = useState("#ffffff");
+  const [mode, setMode] = useState<"light" | "dark">("dark")
+  const theme = useMemo(() => createMyTheme(mode), [mode])
+  const toggleThemeMode = () => {
+    setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'))
+  }
   const isAuthenticated = useSelector(getIsAuthenticated);
   const dispatch = useDispatch<AppDispatch>()
-  const cars = useSelector(CarsData)
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
 
@@ -77,14 +84,13 @@ const App: React.FC = () => {
   }, []);
 
   return (
+    <ThemeProvider theme={theme}>
       <Router>
         <DoubleClickEvent.Provider value={{ heartColor, setHeartColor }}>
           <div className="app">
             <div className="content-holder">
               <Routes>
-                <Route path="/" element={isAuthenticated ? <Slajder /> : <Index />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
+                <Route path="/" element={isAuthenticated ? <Slajder /> : <Auth />} />
                 {isAuthenticated && 
                   <>
                     <Route path="/slajder" element={<Slajder />} />
@@ -100,14 +106,16 @@ const App: React.FC = () => {
                     <Route path="/likedCars" element={<UserCar type="liked"/>} />
                     <Route path="/carProfile" element={<CarProfile />} />
                     <Route path="/carGallery" element={<CarGallery />} />
+                    <Route path="/auth" element={<Auth />} />
                   </>}
-                <Route path="*" element={<Index />} />
+                <Route path="*" element={<Auth />} />
               </Routes>
             </div>
             <MenuContainer />
             </div>
         </DoubleClickEvent.Provider>
       </Router>
+      </ThemeProvider>
   );
 };
 
@@ -117,7 +125,7 @@ const MenuContainer: React.FC = () => {
   const isConfigurationPage = 
   location.pathname === "/configuration"
   || location.pathname === "/login"
-  || location.pathname === "/register";
+  || location.pathname === "/register" || location.pathname === '/auth';
 
   if (isConfigurationPage || !isAuthenticated) {
     return null; // Jeśli jesteśmy na stronie /configuration, zwracamy null, aby ukryć Menu
