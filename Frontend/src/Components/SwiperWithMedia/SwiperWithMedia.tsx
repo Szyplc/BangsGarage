@@ -7,10 +7,15 @@ import "swiper/css/navigation"
 import "swiper/css/pagination"
 import "swiper/css/effect-fade"
 import SideMenu from "../../SideMenu/SideMenu";
+import { useSelector } from "react-redux";
+import { CurrentTheme } from "../../Store/themeSlice";
+import "./../Slajder/Slajder.css"
 
 const SwiperWithMedia = ({ mediaProp, index }: { mediaProp: Media[], index: number }) => {
     const [media, setMedia] = useState<Media[]>(mediaProp)
     const [isDoubleClick, setIsDoubleClick] = useState<boolean>(false)
+    const currentTheme = useSelector(CurrentTheme)
+
     return (
         <>
         <Swiper key={1}
@@ -21,11 +26,10 @@ const SwiperWithMedia = ({ mediaProp, index }: { mediaProp: Media[], index: numb
                 pagination={{ clickable: true }}
                 centeredSlides={true}
                 loop={true}
-                style={{ backgroundColor: "#2f0000"}}
                 onDoubleClick={() => setIsDoubleClick(true)}
         >
             {media.map((media) => (
-                <SwiperSlide style={{ textAlign: "center"}} key={media._id}><div style={{ background: "#240000", height: "100%"}}>
+                <SwiperSlide style={{ textAlign: "center"}} key={media._id}><div style={{ background: currentTheme.Primary, height: "100%"}}>
                     {media.fullUrl && <img style={{ objectFit: "contain" }} src={media.fullUrl} alt={media.fullUrl} /> }
                     </div></SwiperSlide>
             ))}

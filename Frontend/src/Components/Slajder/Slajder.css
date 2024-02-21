@@ -18,5 +18,6 @@
     height: 100%;
   }
   .swiper-horizontal > .swiper-pagination-bullets, .swiper-pagination-bullets.swiper-pagination-horizontal {
-    background-color: white;
+    
   }
+

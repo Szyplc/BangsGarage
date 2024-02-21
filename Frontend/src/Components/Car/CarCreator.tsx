@@ -9,11 +9,15 @@ import { Car, loadCarsData, setCarByCar } from "../../Store/carSlice";
 import { useNavigate } from "react-router-dom";
 import { getUser } from "../../Store/authSlice";
 import { Car_Specification } from "../../../../types/types";
+import { faRotateLeft, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { CurrentTheme } from "../../Store/themeSlice";
 
 function CarCreator() {
     const dispatch = useDispatch<AppDispatch>()
     const navigate = useNavigate();
     const user = useSelector(getUser)
+    const currentTheme = useSelector(CurrentTheme)
     const car = useSelector(Car)
     const [carId, setCarId]  = useState<string>(car?._id || "")
     const [carData, setCarData] = useState<Car_Specification>({
@@ -80,13 +84,15 @@ function CarCreator() {
     }
   
   return (
-    <div className="content">
+    <div className="content" style={{ backgroundColor: currentTheme.LightGray }} >
     <div id="container">
-        <div onClick={undo}>Cofnij</div>
-        <h2>Create a new car</h2>
-        {car && <button onClick={deleteCar}>Usun</button> }
+        <div style={{ display: "flex", justifyContent: "space-around", backgroundColor: currentTheme.Primary, color: currentTheme.LightGray, alignItems: "center" }}>
+        <FontAwesomeIcon style={{ height: "50" }} onClick={undo} icon={faRotateLeft} />
+          <h2>Create a new car</h2>
+          {car && <FontAwesomeIcon style={{ height: "50" }} onClick={deleteCar} icon={faTrash} /> } 
+        </div>
         <form onSubmit={handleSubmit}>
-            <TextField
+            <TextField sx={{ backgroundColor: currentTheme.DarkGray, '& .MuiInputLabel-root': { color: currentTheme.White }, }}
                 label="Producent"
                 name="manufacturer"
                 value={carData.manufacturer || ""}
@@ -96,7 +102,7 @@ function CarCreator() {
                 required
                 type="text"
             />
-            <TextField
+            <TextField sx={{ backgroundColor: currentTheme.DarkGray, '& .MuiInputLabel-root': { color: currentTheme.White }, }}
                 label="Model"
                 name="model"
                 value={carData.model || ""}
@@ -106,7 +112,7 @@ function CarCreator() {
                 required
                 type="text"
             />
-            <TextField
+            <TextField sx={{ backgroundColor: currentTheme.DarkGray, '& .MuiInputLabel-root': { color: currentTheme.White }, }}
                 label="Rok produkcji"
                 name="year"
                 value={carData.year || ""}
@@ -116,7 +122,7 @@ function CarCreator() {
                 required
                 type="number"
             />
-            <TextField
+            <TextField sx={{ backgroundColor: currentTheme.DarkGray, '& .MuiInputLabel-root': { color: currentTheme.White }, }}
                 label="Informacje o silniku"
                 name="engineInfo"
                 value={carData.engineInfo || ""}
@@ -125,7 +131,7 @@ function CarCreator() {
                 margin="normal"
                 type="text"
             />
-            <TextField
+            <TextField sx={{ backgroundColor: currentTheme.DarkGray, '& .MuiInputLabel-root': { color: currentTheme.White }, }}
                 label="Wersja/model"
                 name="version"
                 value={carData.version || ""}
@@ -137,7 +143,7 @@ function CarCreator() {
             
             <AddPhotoToProfileGallery></AddPhotoToProfileGallery>
             
-            <TextField
+            <TextField sx={{ backgroundColor: currentTheme.DarkGray, '& .MuiInputLabel-root': { color: currentTheme.White }, }}
                 label="Przebieg"
                 name="mileage"
                 value={carData.mileage || ""}

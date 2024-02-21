@@ -4,16 +4,19 @@ import { useNavigate } from "react-router-dom";
 import { auth, provider } from "../../base";
 import "./Register.css";
 import axios from "axios";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "../../Store/store";
 import { signIn } from "../../Store/authSlice";
+import { CurrentTheme } from "../../Store/themeSlice";
 
 function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("")
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>()
+  const currentTheme = useSelector(CurrentTheme)
 
   // Funkcja do pobierania lokalizacji użytkownika
   const fetchLocation = (): Promise<number[]> => {
@@ -73,6 +76,12 @@ function Register() {
             });
           })
           .catch((error) => {
+            if(error.message == "Firebase: Error (auth/email-already-in-use).")
+              setErrorMessage("Adres email jest już używany przez innego użytkownika.")
+            else if(error.message == "Firebase: Error (auth/invalid-email).")
+              setErrorMessage("Podany adres email jest nieprawidłowy.")
+            else
+              setErrorMessage("Błąd Rejestracji spróbuj ponownie.")
             console.log("Błąd rejestracji:", error);
           });
       })
@@ -88,7 +97,8 @@ function Register() {
       <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="Email" style={{ marginBottom: '10px' }} />
       <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Password" style={{ marginBottom: '10px' }} />
       <input value={repeatPassword} onChange={(e) => setRepeatPassword(e.target.value)} type="password" placeholder="Repeat Password" style={{ marginBottom: '20px' }} />
-      <button type="submit" style={{ width: "-webkit-fill-available", backgroundColor: '#FFD700', padding: '10px', border: 'none', borderRadius: '5px', marginBottom: '10px' }}>Sign up</button>
+      <button type="submit" style={{ width: "-webkit-fill-available", backgroundColor: currentTheme.SecondAccent, padding: '10px', border: 'none', borderRadius: '5px', marginBottom: '10px' }}>Sign up</button>
+      <div style={{ color: currentTheme.White }}>{errorMessage}</div>
     </form>
   </>
   );

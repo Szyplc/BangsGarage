@@ -68,3 +68,17 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.swiper-pagination-bullet {
+  background-color: white;
+}
+
+.swiper-pagination-bullet-active {
+  background-color: #FB1E1E;
+}
+.swiper-button-prev {
+  color: #FB1E1E;
+}
+.swiper-button-next {
+  color: #FB1E1E;
+}

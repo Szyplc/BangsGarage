@@ -3,12 +3,14 @@ import React, { useState } from 'react';
 import "./Login.css"
 import { useNavigate } from "react-router-dom";
 import { auth } from '../../base';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '../../Store/store';
 import { signIn } from '../../Store/authSlice';
+import { CurrentTheme } from '../../Store/themeSlice';
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const currentTheme = useSelector(CurrentTheme)
 
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>()
@@ -23,8 +25,15 @@ function Login() {
         navigate('/profile');
     })
       .catch((error: Error) => {
-        console.log(error);
-        setErrorMessage(error.message)
+        console.log(error.message)
+        if(error.message == "Firebase: Error (auth/invalid-email).")
+          setErrorMessage("Podany adres email jest nieprawidłowy.")
+        else if(error.message == "Firebase: Error (auth/user-not-found).")
+          setErrorMessage("Nie znaleziono użytkownika odpowiadającego podanemu adresowi email.")
+        else if(error.message == "Firebase: Error (auth/wrong-password).")
+          setErrorMessage("Podane hasło jest nieprawidłowe dla danego użytkownika.")
+        else
+          setErrorMessage("Błąd logowania spróbuj ponownie.")
       });
   };
 
@@ -33,8 +42,9 @@ function Login() {
       <form onSubmit={signInSubmit}>
         <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="Email" style={{ marginBottom: '10px' }} />
         <input type="password" onChange={(e) => setPassword(e.target.value)} placeholder="Password" style={{ marginBottom: '20px' }} />
-        <button type="submit" style={{ width: "-webkit-fill-available", backgroundColor: '#FFD700', padding: '10px', border: 'none', borderRadius: '5px', marginBottom: '10px' }}>Sign in</button>
+        <button type="submit" style={{ width: "-webkit-fill-available", backgroundColor: currentTheme.SecondAccent, padding: '10px', border: 'none', borderRadius: '5px', marginBottom: '10px' }}>Sign in</button>
       </form>
+      <div style={{ color: currentTheme.White }}>{errorMessage}</div>
     </>
   );
 }

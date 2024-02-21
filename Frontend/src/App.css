@@ -12,4 +12,5 @@ body {
   .content-holder {
     flex: 1; 
     overflow-y: auto;
+    background-color: #000;
   }

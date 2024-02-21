@@ -25,26 +25,9 @@ import { auth } from "./base";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "./Store/store";
 import { getIsAuthenticated, signIn, signOut } from "./Store/authSlice";
-import { CarsData, getLikedCars, loadCarsData, setCarById } from "./Store/carSlice";
-import { createMyTheme } from "./theme";
-import { ThemeProvider } from "@mui/styles";
 import Auth from "./Components/Auth/Auth";
 
-export const DoubleClickEvent = createContext<{
-  heartColor: string;
-  setHeartColor: React.Dispatch<React.SetStateAction<string>>;
-}>({
-  heartColor: "#ffffff",
-  setHeartColor: () => {},
-});
-
 const App: React.FC = () => {
-  const [heartColor, setHeartColor] = useState("#ffffff");
-  const [mode, setMode] = useState<"light" | "dark">("dark")
-  const theme = useMemo(() => createMyTheme(mode), [mode])
-  const toggleThemeMode = () => {
-    setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'))
-  }
   const isAuthenticated = useSelector(getIsAuthenticated);
   const dispatch = useDispatch<AppDispatch>()
   useEffect(() => {
@@ -84,9 +67,7 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <ThemeProvider theme={theme}>
       <Router>
-        <DoubleClickEvent.Provider value={{ heartColor, setHeartColor }}>
           <div className="app">
             <div className="content-holder">
               <Routes>
@@ -113,9 +94,7 @@ const App: React.FC = () => {
             </div>
             <MenuContainer />
             </div>
-        </DoubleClickEvent.Provider>
       </Router>
-      </ThemeProvider>
   );
 };
 
