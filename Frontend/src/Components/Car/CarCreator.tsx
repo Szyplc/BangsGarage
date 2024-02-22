@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { TextField, Button } from '@mui/material';
+import { TextField, Button, makeStyles } from '@mui/material';
 import AddPhotoToProfileGallery from "../Profile/AddPhotoToGallery/AddPhotoToProfileGallery";
 import "./CarCreator.css"
 import axios, { AxiosError } from "axios";
@@ -12,6 +12,7 @@ import { Car_Specification } from "../../../../types/types";
 import { faRotateLeft, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { CurrentTheme } from "../../Store/themeSlice";
+import { styled } from "@mui/styles";
 
 function CarCreator() {
     const dispatch = useDispatch<AppDispatch>()
@@ -82,79 +83,73 @@ function CarCreator() {
       dispatch(loadCarsData())
       navigate("/profile")
     }
-  
+
   return (
-    <div className="content" style={{ backgroundColor: currentTheme.LightGray }} >
+    <div className="content" style={{ backgroundColor: currentTheme.DarkGray }} >
     <div id="container">
         <div style={{ display: "flex", justifyContent: "space-around", backgroundColor: currentTheme.Primary, color: currentTheme.LightGray, alignItems: "center" }}>
         <FontAwesomeIcon style={{ height: "50" }} onClick={undo} icon={faRotateLeft} />
           <h2>Create a new car</h2>
           {car && <FontAwesomeIcon style={{ height: "50" }} onClick={deleteCar} icon={faTrash} /> } 
         </div>
-        <form onSubmit={handleSubmit}>
-            <TextField sx={{ backgroundColor: currentTheme.DarkGray, '& .MuiInputLabel-root': { color: currentTheme.White }, }}
+        <form style={{ padding: '30px', marginLeft: "20px", marginRight: "30px",  }} onSubmit={handleSubmit}>
+            <TextField color="error" style={{ backgroundColor: currentTheme.White, color: currentTheme.Accent}}
                 label="Producent"
                 name="manufacturer"
-                value={carData.manufacturer || ""}
+                value={carData.manufacturer}
                 onChange={handleChange}
-                fullWidth
                 margin="normal"
                 required
                 type="text"
             />
-            <TextField sx={{ backgroundColor: currentTheme.DarkGray, '& .MuiInputLabel-root': { color: currentTheme.White }, }}
+            <TextField color="error" style={{ backgroundColor: currentTheme.White, color: currentTheme.Accent}}
                 label="Model"
                 name="model"
                 value={carData.model || ""}
                 onChange={handleChange}
-                fullWidth
                 margin="normal"
                 required
                 type="text"
             />
-            <TextField sx={{ backgroundColor: currentTheme.DarkGray, '& .MuiInputLabel-root': { color: currentTheme.White }, }}
+            <TextField color="error" style={{ backgroundColor: currentTheme.White, color: currentTheme.Accent}}
                 label="Rok produkcji"
                 name="year"
                 value={carData.year || ""}
                 onChange={handleChange}
-                fullWidth
                 margin="normal"
                 required
                 type="number"
             />
-            <TextField sx={{ backgroundColor: currentTheme.DarkGray, '& .MuiInputLabel-root': { color: currentTheme.White }, }}
+            <TextField color="error" style={{ backgroundColor: currentTheme.White, color: currentTheme.Accent}}
                 label="Informacje o silniku"
                 name="engineInfo"
                 value={carData.engineInfo || ""}
                 onChange={handleChange}
-                fullWidth
                 margin="normal"
                 type="text"
             />
-            <TextField sx={{ backgroundColor: currentTheme.DarkGray, '& .MuiInputLabel-root': { color: currentTheme.White }, }}
+            <TextField color="error" style={{ backgroundColor: currentTheme.White, color: currentTheme.Accent}}
                 label="Wersja/model"
                 name="version"
                 value={carData.version || ""}
                 onChange={handleChange}
-                fullWidth
                 margin="normal"
                 type="text"
             />
-            
-            <AddPhotoToProfileGallery></AddPhotoToProfileGallery>
-            
-            <TextField sx={{ backgroundColor: currentTheme.DarkGray, '& .MuiInputLabel-root': { color: currentTheme.White }, }}
+            <div>
+              <AddPhotoToProfileGallery></AddPhotoToProfileGallery>
+            </div>
+            <TextField color="error" style={{ backgroundColor: currentTheme.White, color: currentTheme.Accent}}
                 label="Przebieg"
                 name="mileage"
                 value={carData.mileage || ""}
                 onChange={handleChange}
-                fullWidth
                 margin="normal"
                 type="number"
             />
-            <Button type="submit" variant="contained" color="primary" style={{ marginTop: "15px" }}>
-                Wyślij
-            </Button>
+            <div style={{ alignSelf: "center"}}><button type="submit" style={{ paddingLeft: "30px", paddingRight: "30px", marginTop: "15px", backgroundColor: currentTheme.Accent, color: currentTheme.LightGray }}>
+                Zapisz
+            </button></div>
         </form>
       
     </div>

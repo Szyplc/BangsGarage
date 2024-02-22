@@ -8,6 +8,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { getUser } from "../../../Store/authSlice";
 import { AppDispatch } from "../../../Store/store";
 import { signOut } from "../../../Store/authSlice"
+import { faImage, faRightFromBracket, faX } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { CurrentTheme } from "../../../Store/themeSlice";
+import { InputLabel, MenuItem, Select, TextField } from "@mui/material";
 
 function Configuration() {
   const default_photo_image = "https://firebasestorage.googleapis.com/v0/b/bangsgarage.appspot.com/o/config%2Fdefault_profile_image.png?alt=media&token=48953722-672d-4f36-9571-75a0c418059b";
@@ -20,6 +24,7 @@ function Configuration() {
   const user = useSelector(getUser)
   const dispatch = useDispatch<AppDispatch>()
   const navigate = useNavigate();
+  const currentTheme = useSelector(CurrentTheme)
 
   const handleUpload = async (title_new_photo: File) => {
    if(userPhoto != default_photo_image)
@@ -44,7 +49,7 @@ function Configuration() {
         }));
         setUsername(data.username)
         setGenderOptions(obj);
-        setGender(data.gender ? data.gender : data.genderDictionary.MALE);
+        setGender(data.gender ? (data.gender).toUpperCase() : data.genderDictionary.MALE);
         setDescription(data.description);
         setAge(data.age);
         setUserPhoto(data.url);
@@ -76,7 +81,7 @@ function Configuration() {
   };
   
   const deletePhoto = (url: string) => {
-    if(url != default_photo_image)
+    if(url != default_photo_image && url != "")
     {
       try {
         const filetoDel = storage.refFromURL(url);
@@ -152,27 +157,30 @@ function Configuration() {
 
   return (
     <div className="sign-Up-container">
-      <form className="register-form" onSubmit={updateProfile}>
-        <h1>Profile Configuration</h1>
+      <div style={{ color: currentTheme.LightGray, backgroundColor: currentTheme.Background, width: '100%', position: "fixed", top: 0 }}>
+        <h2 style={{ marginLeft: "7vw"}}>Profile Configuration</h2>
+        <FontAwesomeIcon onClick={SignOutOnClick} style={{ right: '2vw', position: 'fixed', top: '2vh', height: "40px", width: "40px" }} icon={faRightFromBracket} />
+      </div>
+      <form className="config-form" onSubmit={updateProfile} style={{ backgroundColor: currentTheme.LightGray, width: "80%", height: "80%", borderRadius: "10px"}}>
         <h4>{user?.email}</h4>
-        <h3 onClick={SignOutOnClick}>Wyloguj</h3>
-        <input type="text" 
+        <TextField color="error" type="text"  style={{ marginBottom: "2vh", backgroundColor: currentTheme.White }} 
           placeholder="username"
           value={username || ""}
           onChange={(e) => setUsername(e.target.value)}
           className="register-input"
         />
 
-        <input
+        <TextField color="error" style={{ backgroundColor: currentTheme.White}}
           type="number"
           placeholder="Enter your age"
           value={age || ""}
           onChange={(e) => setAge(e.target.value)}
           className="register-input"
         />
-        <label htmlFor="gender">Płeć:</label>
-        <select
+        <InputLabel id="label-gender" htmlFor="gender">Płeć:</InputLabel>
+        <Select color="error" style={{ backgroundColor: currentTheme.White}}
           id="gender"
+          labelId="label-gender"
           name="gender"
           value={gender || ""}
           onChange={(e) => {
@@ -180,14 +188,14 @@ function Configuration() {
           }}
         >
           {genderOptions.map((option: { _id: string, name: string}) => (
-            <option key={option._id} value={option._id}>
+            <MenuItem key={option._id} value={option._id}>
               {option.name}
-            </option>
+            </MenuItem>
           ))}
-        </select>
+        </Select>
 
         <label htmlFor="description">Opis:</label>
-        <textarea
+        <TextField color="error" multiline style={{ backgroundColor: currentTheme.White}}
           id="description"
           name="description"
           value={description || ""}
@@ -195,16 +203,21 @@ function Configuration() {
         />
 
         <label htmlFor="profileImage">Zdjęcie profilowe:</label>
-        <input
-          type="file"
-          id="profileImage"
-          name="profileImage"
-          accept="image/*"
-          onChange={handleProfileImageChange}
-        />
-        <img src={userPhoto} alt="Zdjęcie" className="profile_photo" />
-        <div onClick={DeleteProfilePicture}>Usun zdjęcie profilowe</div>
-        <button type="submit" className="register-button">
+        <div style={{ display: "flex", justifyContent: "space-evenly"}}>
+          <label htmlFor="file-input" style={{ verticalAlign: "center", margin: "10px"}}>
+            <FontAwesomeIcon  style={{ height: "70px", color: currentTheme.White }} icon={faImage} />
+            <input
+              type="file"
+              id="file-input"
+              name="profileImage"
+              accept="image/*"
+              onChange={handleProfileImageChange} 
+              style={{ display: 'none'}}
+            />
+          </label>
+          <img src={userPhoto} alt="Zdjęcie" className="profile_photo" />
+          </div>
+        <button type="submit" className="register-button" style={{ backgroundColor: currentTheme.Accent }}>
           CONFIGURATION
         </button>
       </form>

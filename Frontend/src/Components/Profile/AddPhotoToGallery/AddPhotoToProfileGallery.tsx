@@ -6,6 +6,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getUser } from '../../../Store/authSlice';
 import { Car, loadCarsData } from '../../../Store/carSlice';
 import { AppDispatch } from '../../../Store/store';
+import { faImage } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { CurrentTheme } from '../../../Store/themeSlice';
 
 const AddPhotoToProfileGallery = () => {
     const dispatch = useDispatch<AppDispatch>()
@@ -13,6 +16,7 @@ const AddPhotoToProfileGallery = () => {
     const car = useSelector(Car)
     const [filePath, setFilePath] = useState<string>(user?.uid + "/" + car?._id || "" + "/")
     const [imageSource, setImageSource] = useState<string>(car?.profileUrl || "")
+    const currentTheme = useSelector(CurrentTheme)
 
     const handleProfileImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
@@ -21,7 +25,7 @@ const AddPhotoToProfileGallery = () => {
               const firebaseUrl = await sendPhotoToFirebase(file)
               sendPhotoToDatabase(file.name, firebaseUrl)
               await deleteOldProfileImage()
-              dispatch(loadCarsData())
+              //dispatch(loadCarsData())
             }
             setImageSource(URL.createObjectURL(file))
         }
@@ -72,8 +76,12 @@ const AddPhotoToProfileGallery = () => {
 
     return (
         <>
-            { isImage() ? ( <img src={imageSource} width={100} height={100}/> ) : "" }
-            <input type='file' onChange={handleProfileImageChange} accept="image/*" />
+            { isImage() ? ( <img src={imageSource} width="100%" /> ) : "" }
+                  <label htmlFor="file-input" style={{ verticalAlign: "center", margin: "10px"}}>
+                      <FontAwesomeIcon style={{ height: "50px", color: currentTheme.White }} icon={faImage} />
+                    <input id='file-input' type='file' style={{ display: 'none' }} onChange={handleProfileImageChange} accept="image/*" />
+                  </label>
+                    
             {/*<button>{ isImage() ? "Zmień" : "Dodaj" }</button>*/}
         </>
     )
