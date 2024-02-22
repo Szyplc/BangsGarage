@@ -1,5 +1,5 @@
-import React, { createContext, useEffect, useMemo, useState } from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import "./Components/Slajder/Slajder.css";
 import "./App.css"
 
@@ -9,16 +9,9 @@ import Menu from "./Components/Menu/Menu";
 import Messages from "./Components/Communication/Messages/Messages";
 import Requests from "./Components/Communication/Requests/Request";
 import Chat from "./Components/Communication/Chat";
-import Search from "./Components/Search/Search";
-import QuestionForm from "./Components/Profile/QuestionForm/QuestionForm";
-import MenuSurveys from "./Components/Profile/QuestionForm/MenuSurveys";
-import Register from "./Components/Auth/Register";
-import Index from "./Index";
 import Configuration from "./Components/Profile/Configuration/Configuration";
-import Login from "./Components/Auth/Login";
 import CarCreator from "./Components/Car/CarCreator";
 import UserCar from "./Components/Car/UserCar";
-import CarProfile from "./Components/Car/CarProfile";
 import CarGallery from "./Components/CarGallery/CarGallery";
 import { User, getIdTokenResult, onAuthStateChanged } from "firebase/auth";
 import { auth } from "./base";
@@ -79,13 +72,10 @@ const App: React.FC = () => {
                     <Route path="/liked_cars" element={<Profile />} />
                     <Route path="/requests" element={<Requests />} />
                     <Route path="/chat" element={<Chat />} />
-                    <Route path="/surveys" element={<QuestionForm />} />
-                    <Route path="/menuSurveys" element={<MenuSurveys />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/configuration" element={<Configuration />} />
                     <Route path="/carConfig" element={<CarCreator />} />
                     <Route path="/likedCars" element={<UserCar type="liked"/>} />
-                    <Route path="/carProfile" element={<CarProfile />} />
                     <Route path="/carGallery" element={<CarGallery />} />
                     <Route path="/auth" element={<Auth />} />
                   </>}

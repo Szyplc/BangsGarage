@@ -1,7 +1,7 @@
-import { GoogleAuthProvider, UserCredential, createUserWithEmailAndPassword, getRedirectResult, signInWithEmailAndPassword, signInWithPopup, signInWithRedirect } from "firebase/auth";
+import { UserCredential, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth, provider } from "../../base";
+import { auth } from "../../base";
 import "./Register.css";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";

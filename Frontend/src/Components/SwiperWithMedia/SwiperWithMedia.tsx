@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Media } from "../../../../types/types";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, EffectFade } from "swiper/modules"
@@ -12,7 +12,7 @@ import { CurrentTheme } from "../../Store/themeSlice";
 import "./../Slajder/Slajder.css"
 
 const SwiperWithMedia = ({ mediaProp, index }: { mediaProp: Media[], index: number }) => {
-    const [media, setMedia] = useState<Media[]>(mediaProp)
+    const [media] = useState<Media[]>(mediaProp)
     const [isDoubleClick, setIsDoubleClick] = useState<boolean>(false)
     const currentTheme = useSelector(CurrentTheme)
 

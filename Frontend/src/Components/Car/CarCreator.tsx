@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { TextField, Button, makeStyles } from '@mui/material';
+import { TextField, } from '@mui/material';
 import AddPhotoToProfileGallery from "../Profile/AddPhotoToGallery/AddPhotoToProfileGallery";
 import "./CarCreator.css"
 import axios, { AxiosError } from "axios";
@@ -7,17 +7,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "../../Store/store";
 import { Car, loadCarsData, setCarByCar } from "../../Store/carSlice";
 import { useNavigate } from "react-router-dom";
-import { getUser } from "../../Store/authSlice";
 import { Car_Specification } from "../../../../types/types";
 import { faRotateLeft, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { CurrentTheme } from "../../Store/themeSlice";
-import { styled } from "@mui/styles";
 
 function CarCreator() {
     const dispatch = useDispatch<AppDispatch>()
     const navigate = useNavigate();
-    const user = useSelector(getUser)
     const currentTheme = useSelector(CurrentTheme)
     const car = useSelector(Car)
     const [carId, setCarId]  = useState<string>(car?._id || "")
@@ -61,8 +58,7 @@ function CarCreator() {
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        console.log(carData)
-        let res = await axios.put("http://127.0.0.1:3000/update_car", {...carData, carId: carId }, {
+        await axios.put("http://127.0.0.1:3000/update_car", {...carData, carId: carId }, {
           headers: {
             "Content-Type": "application/json",
           }

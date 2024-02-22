@@ -1,4 +1,3 @@
-import React, { useEffect } from "react";
 import "./UserCar.css"
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";

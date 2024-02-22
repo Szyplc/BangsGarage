@@ -14,9 +14,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { getUser } from "../../Store/authSlice";
 import { AppDispatch } from "../../Store/store";
 import { Swiper as SwiperClass } from "swiper/types";
-import { CarData } from "../../../../types/types";
+import { CarData, Media } from "../../../../types/types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCirclePlus, faGear, faImage, faPlus, faRotateLeft, faTrash, faX } from "@fortawesome/free-solid-svg-icons";
+import { faGear, faImage, faPlus, faRotateLeft, faTrash, faX } from "@fortawesome/free-solid-svg-icons";
 import { CurrentTheme } from "../../Store/themeSlice";
 
 const CarGallery = () => {
@@ -26,7 +26,7 @@ const CarGallery = () => {
     const cars = useSelector(CarsData)
     //check if it is your car
     const result = cars.find(c => c._id == car?._id)
-    const [isYourCar, setIsYourCar] = useState<boolean>(Boolean(result))
+    const [isYourCar] = useState<boolean>(Boolean(result))
     const [selectedPhoto, setSelectedPhoto] = useState<string>("")
     const [currentIndex, setCurrentIndex] = useState(0);
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -123,7 +123,7 @@ const CarGallery = () => {
                         loop={true}
                         onSlideChange={handleSlideChange}
                 >
-                    {car.media.map((media) => (
+                    {car.media.map((media: Media) => (
                         <SwiperSlide style={{ textAlign: "center"}} key={media._id}><div style={{ background: currentTheme.LightGray, height: "100%"}}>
                             {media.fullUrl && <img style={{ objectFit: "contain" }} src={media.fullUrl} alt={media.fullUrl} /> }
                             </div></SwiperSlide>

@@ -1,20 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import "./AddPhotoToProfileGallery.css"
 import { storage } from "../../../base";
-import axios, { AxiosError } from 'axios';
-import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
 import { getUser } from '../../../Store/authSlice';
-import { Car, loadCarsData } from '../../../Store/carSlice';
-import { AppDispatch } from '../../../Store/store';
+import { Car } from '../../../Store/carSlice';
 import { faImage } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { CurrentTheme } from '../../../Store/themeSlice';
 
 const AddPhotoToProfileGallery = () => {
-    const dispatch = useDispatch<AppDispatch>()
     const user = useSelector(getUser)
     const car = useSelector(Car)
-    const [filePath, setFilePath] = useState<string>(user?.uid + "/" + car?._id || "" + "/")
+    const [filePath] = useState<string>(user?.uid + "/" + car?._id || "" + "/")
     const [imageSource, setImageSource] = useState<string>(car?.profileUrl || "")
     const currentTheme = useSelector(CurrentTheme)
 

@@ -3,7 +3,6 @@ import axios from 'axios';
 import { User, signOut as firebaseSignOut } from "firebase/auth";
 import { auth } from '../base'; // Adjust the import path as needed
 import { RootState } from './store';
-import { setInitialValue } from './carSlice';
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -33,7 +32,6 @@ export const signOut = createAsyncThunk(
   async (_) => {
     await firebaseSignOut(auth); // Using Firebase signOut
     setIsAuthenticated(false)
-    setInitialValue()
     delete axios.defaults.headers.common['Authorization'];
   }
 );

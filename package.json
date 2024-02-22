@@ -5,7 +5,8 @@
   "scripts": {
     "start": "concurrently \"npm run start --prefix Backend\" \"npm run dev --prefix Frontend\"",
     "dev": "concurrently \"npm run watch:build --prefix Backend\" \" npm run watch:server --prefix Backend\" \"npm run dev --prefix Frontend\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run build --prefix Backend && npm run build --prefix Frontend"
   },
   "repository": {
     "type": "git",

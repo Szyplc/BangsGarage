@@ -8,13 +8,11 @@ import { AppDispatch } from "../../Store/store";
 import { CarToShowIndex, CarsToShow, getCarToShow, setCarToShowIndex } from "../../Store/carSlice";
 import SwiperWithMedia from "../SwiperWithMedia/SwiperWithMedia";
 import { CarData } from "../../../../types/types";
-import { CurrentTheme } from "../../Store/themeSlice";
 
 const Slajder: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>()
   const carToShowIndex = useSelector(CarToShowIndex)
   const carsToShow = useSelector(CarsToShow)
-  const currentTheme = useSelector(CurrentTheme)
   const handleSlideChange = async (swiper: SwiperClass) => {
     dispatch(setCarToShowIndex(swiper.activeIndex))
   };
@@ -44,8 +42,7 @@ const Slajder: React.FC = () => {
       >
         {carsToShow.map((item: CarData, index: number) => (
           <SwiperSlide key={item._id}>
-            <SwiperWithMedia mediaProp={item.media} index={index}>
-            </SwiperWithMedia>
+            <SwiperWithMedia mediaProp={item.media} index={index} />
           </SwiperSlide>
         ))}
       </Swiper>

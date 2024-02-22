@@ -1,6 +1,6 @@
 //import { signOut } from "firebase/auth";
 import { useEffect, useState } from "react";
-import { auth, storage } from "../../../base";
+import {  storage } from "../../../base";
 import "./Configuration.css";
 import { useNavigate } from "react-router-dom";
 import axios, { AxiosResponse } from "axios";
@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getUser } from "../../../Store/authSlice";
 import { AppDispatch } from "../../../Store/store";
 import { signOut } from "../../../Store/authSlice"
-import { faImage, faRightFromBracket, faX } from "@fortawesome/free-solid-svg-icons";
+import { faImage, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { CurrentTheme } from "../../../Store/themeSlice";
 import { InputLabel, MenuItem, Select, TextField } from "@mui/material";
@@ -149,11 +149,6 @@ function Configuration() {
     }
     navigate("/");
   };
-
-  const DeleteProfilePicture = () => {
-    deletePhoto(userPhoto);
-    setUserPhoto(default_photo_image);
-  }
 
   return (
     <div className="sign-Up-container">

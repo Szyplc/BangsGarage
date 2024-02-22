@@ -3,7 +3,7 @@ import "./Menu.css";
 import { BottomNavigation, BottomNavigationAction } from "@mui/material";
 import { faHeart, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import { CurrentTheme } from "../../Store/themeSlice";
 

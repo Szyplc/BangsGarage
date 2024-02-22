@@ -6,7 +6,8 @@
   "scripts": {
     "clean": "rimraf dist",
     "watch:build": "tsc --watch",
-    "watch:server": "nodemon ./dist/Backend/src/index.js --watch ./dist/Backend/src/"
+    "watch:server": "nodemon ./dist/Backend/src/index.js --watch ./dist/Backend/src/",
+    "build": "tsc"
   },
   "author": "Szyplo",
   "license": "ISC",

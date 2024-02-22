@@ -1,19 +1,17 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { useStyles } from "../style";
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Heart from "./SideMenuComponents/Heart";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Car, CarToShowIndex, CarsToShow, LikesToShow, setCarByCar } from "../Store/carSlice";
-import { getUser } from "../Store/authSlice";
+import { CarToShowIndex, CarsToShow, LikesToShow, setCarByCar } from "../Store/carSlice";
 import axios from "axios";
-import { AppDispatch, RootState } from "../Store/store";
+import { AppDispatch } from "../Store/store";
 
 const SideMenu = ({ indexMenu, isDoubleClick } : { indexMenu: number, isDoubleClick: boolean }) => {
   const classes = useStyles();
   const navigate = useNavigate();
-  const user = useSelector(getUser)
   const index = useSelector(CarToShowIndex)
   const carsToShow = useSelector(CarsToShow)
   const likesToShow = useSelector(LikesToShow)
