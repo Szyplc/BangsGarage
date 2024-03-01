@@ -6,7 +6,7 @@ import "./Slajder.css";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "../../Store/store";
 import { CarToShowIndex, CarsToShow, getCarToShow, setCarToShowIndex } from "../../Store/carSlice";
-import SwiperWithMedia from "../SwiperWithMedia/SwiperWithMedia";
+import SwiperWithMedia from "./SwiperWithMedia/SwiperWithMedia";
 import { CarData } from "../../../../types/types";
 
 const Slajder: React.FC = () => {

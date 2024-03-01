@@ -1,4 +1,4 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 const GenderEnum = {
   MALE: 'male',
@@ -64,30 +64,30 @@ const Likes_schema = new mongoose.Schema({
   //date_time: { type: Date, default: Date.now },
 }, { timestamps: true })
 
-const Like_type = new mongoose.Schema({
-  _id: mongoose.Schema.Types.ObjectId,
-  name: { type: String }
-}, { timestamps: true })
+// const Like_type = new mongoose.Schema({
+//   _id: mongoose.Schema.Types.ObjectId,
+//   name: { type: String }
+// }, { timestamps: true })
 
-const Comment = new mongoose.Schema({
-  _id: mongoose.Schema.Types.ObjectId,
-  user_comment: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  car_commented: { type: mongoose.Schema.Types.ObjectId, ref: "Car" },
-  content: { type: String, required: true }
-}, { timestamps: true})
-//na później/////////////////////////////
-const Connections = new mongoose.Schema({
-  id: mongoose.Schema.Types.ObjectId,
-  user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User'},
-  date_time: { type: Date, default: Date.now },
-  interaction_time: { type: Number }//
-})
+// const Comment = new mongoose.Schema({
+//   _id: mongoose.Schema.Types.ObjectId,
+//   user_comment: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+//   car_commented: { type: mongoose.Schema.Types.ObjectId, ref: "Car" },
+//   content: { type: String, required: true }
+// }, { timestamps: true})
+// //na później/////////////////////////////
+// const Connections = new mongoose.Schema({
+//   id: mongoose.Schema.Types.ObjectId,
+//   user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User'},
+//   date_time: { type: Date, default: Date.now },
+//   interaction_time: { type: Number }//
+// })
 
-const Account_type = new mongoose.Schema({
-  id: mongoose.Schema.Types.ObjectId,
-  name: { type: String },
-  price: { type: Number },
-});
+// const Account_type = new mongoose.Schema({
+//   id: mongoose.Schema.Types.ObjectId,
+//   name: { type: String },
+//   price: { type: Number },
+// });
 
 const Chat_room_schema = new mongoose.Schema({
   _id: mongoose.Schema.Types.ObjectId,

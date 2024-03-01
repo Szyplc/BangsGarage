@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+Functions/
+dist/
+node_modules/
+.firebase/

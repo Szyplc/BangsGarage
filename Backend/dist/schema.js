@@ -40,7 +40,7 @@ const Car_Specification_schema = new mongoose_1.default.Schema({
     year: { type: Number, required: true },
     engineInfo: { type: String, required: false },
     version: { type: String, required: false },
-    milage: { type: Number, required: false }
+    mileage: { type: Number, required: false }
     //na razie tyle
 }, { timestamps: true });
 //Media jako pojedyncze zdjęcie możliwośc korzystania w poście od auta jako zdjęcie profilowe użytkownika
@@ -55,12 +55,12 @@ const Media_schema = new mongoose_1.default.Schema({
     profile: { type: Boolean },
     title: { type: String },
 }, { timestamps: true });
-const Likes = new mongoose_1.default.Schema({
+const Likes_schema = new mongoose_1.default.Schema({
     id: mongoose_1.default.Schema.Types.ObjectId,
     user_liked_id: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'User' },
-    car_likeing: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Car' },
-    like_type_id: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Likes_type' },
-    date_time: { type: Date, default: Date.now },
+    car_liking: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Car' },
+    //like_type_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Likes_type' },
+    //date_time: { type: Date, default: Date.now },
 }, { timestamps: true });
 const Like_type = new mongoose_1.default.Schema({
     _id: mongoose_1.default.Schema.Types.ObjectId,
@@ -104,4 +104,5 @@ const Conversation = mongoose_1.default.model('Conversation', Conversation_schem
 const Media = mongoose_1.default.model('Media', Media_schema);
 const Car = mongoose_1.default.model("Car", Car_schema);
 const Car_Specification = mongoose_1.default.model("Car_Specification", Car_Specification_schema);
-module.exports = { User, Chat_room, Conversation, Media, GenderEnum, Car, Car_Specification /*, Media, Account_type, Connections, Like_type, Likes*/ };
+const Likes = mongoose_1.default.model("Likes", Likes_schema);
+module.exports = { User, Chat_room, Conversation, Media, GenderEnum, Car, Car_Specification, Likes /*, Media, Account_type, Connections, Like_type*/ };

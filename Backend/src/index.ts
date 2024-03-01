@@ -1,16 +1,14 @@
-const { User, Chat_room, Conversation, Media, GenderEnum, Car, Car_Specification, Likes } = require('./schema.js');
-import mongoose, { mongo } from 'mongoose';
+const { User, Media, GenderEnum, Car, Car_Specification, Likes } = require('./schema.js');
+import mongoose from 'mongoose';
 import cors from "cors"
-import { MongoClient, ObjectId } from 'mongodb';
 import express from 'express';
-import bodyParser from "body-parser";
 //firebase
 import { initializeApp } from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 import admin from 'firebase-admin';
 import { User } from 'firebase/auth';
-import { CarData, Car_Specification, Media, Like } from "../../types/types"
+import { CarData, Car_Specification, Media } from "./../../types/types"
 import "dotenv/config.js"
 const serviceAccount = require('./bangsgarage-firebase-adminsdk-o8ms7-ad6dd68035.json');
 const uri = 'mongodb+srv://generalkenobi1919:X3AdbUJMjhaCI8RN@cluster0.zcokpld.mongodb.net/Praktyki';
@@ -84,7 +82,6 @@ const firebaseAuthMiddleware = async (req: any, res: any, next: any) => {
 async function main() {
   let db = await con()
   db.on('error', console.error.bind(console, 'Błąd połączenia:'));
-  const col = db.collection("Praktyki");
   firebase_connection();
 }
 
@@ -440,7 +437,7 @@ app.put("/update_car", async (req: any, res) => {
     //if (image !== undefined) updateData.image = image;
     if (mileage !== undefined) updateData.mileage = mileage;
 
-    const updateCar = await Car_Specification.findByIdAndUpdate(car_spec_id, updateData, { new: true });
+    await Car_Specification.findByIdAndUpdate(car_spec_id, updateData, { new: true });
   } catch(error) {
     console.error("Wystapil blad", error)
   }
@@ -509,19 +506,56 @@ app.get("/getCarData", async (req, res) => {
 app.get("/getCarToSlider", async (req, res) => {
   const indexToConvert = req?.query?.index; // Pobierz indeks z ciała żądania
   const index = parseInt(typeof indexToConvert == 'string' ? indexToConvert : "-1")
-  if (typeof index !== 'number' || index < 0) {
+  if (index < 0) {
     return res.status(400).send({ message: "Nieprawidłowy index, powinien być liczbą większą od 0." });
   }
 
   try {
     // Znajdź wszystkie samochody, posortuj je malejąco według liczby polubień
-    const cars = await Car.find({ "media.0": { $exists: true } })
-    .sort({ likes_count: -1 })
+    const cars = await Car.find({ "media.0": { $exists: true } })//.sort({ likes_count: -1 })
     .populate('Car_Specification')
     .populate('media')
     .exec();
     // Wybierz samochód na pozycji index-1 (ponieważ tablice są indeksowane od 0)
-    const carAtIndex = cars[index];
+    
+    const carRate: number[] = []
+    //user localization
+    const userToken = req.decodedToken
+    const user = await User.findOne({ uid: userToken?.user_id })
+    const [userLat, userLon] = user.localization
+
+    for(const car of cars) {
+      //oblicanie ile to polubienia
+      let likesRate;
+      if(car.views <= 0)
+        likesRate = 0.0001;
+      else
+        likesRate = (car.likes_count + 1) / car.views
+      //właścicel auta i jego lokalizacja oraz czy dane auto nie należy do przeglądającego auto
+      const car_owner_id = car.user_id;
+      if(car_owner_id == user._id)
+        continue
+      const currentUser = await User.findById(car_owner_id)
+      const [currentUserLat, currentUserLon] = currentUser.localization
+      //obliczanie jak daleko
+      let distance = calculateDistance(userLat, userLon,  currentUserLat, currentUserLon) + 1;
+      const radius = 500; // promień w którym szukamy aut
+      distance = distance / radius
+      //calculating time in hours
+      const givenDate: Date = new Date(car.createdAt);
+      const currentDate: Date = new Date();
+      const differenceInHours: number = (currentDate.getTime() - givenDate.getTime()) / 1000 / 60 / 60 + 0.0001;
+      //likesRate - more better
+      //distance - lower better
+      //differenceInHours - lower better
+      const result = likesRate / (distance * differenceInHours) * 1000
+      carRate.push(result)
+    }
+    //sort
+    let combined = cars.map((car, i) => [car,  carRate[i]]);
+    combined = combined.sort((a, b) => b[1] - a[1]);
+
+    const carAtIndex = combined[index][0];
 
     if (!carAtIndex) {
       return res.send(null)
@@ -585,6 +619,8 @@ app.get("/check_if_user_like_car", async (req, res) => {
   if(typeof carId == 'string' && typeof userId == 'string') {
     try {
       const user = await User.findOne({ uid: userId })
+      await Car.findOneAndUpdate({ _id: carId}, { $inc:  { views: 1 } })
+
       const isLike = await Likes.find({ user_liked_id: user?._id, car_liking: carId })
       if (isLike?.length > 0)
         res.send(true)
@@ -614,3 +650,21 @@ app.get("/get_liked_cars", async (req, res) => {
 app.listen(3000, () => {
   console.log('Serwer nasłuchuje na porcie 3000');
 });
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Promień Ziemi w kilometrach
+  const dLat = degreesToRadians(lat2 - lat1);
+  const dLon = degreesToRadians(lon2 - lon1);
+  lat1 = degreesToRadians(lat1);
+  lat2 = degreesToRadians(lat2);
+
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2); 
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  const distance = R * c; // Dystans w kilometrach
+  return distance;
+}
+
+function degreesToRadians(degrees) {
+  return degrees * (Math.PI / 180);
+}

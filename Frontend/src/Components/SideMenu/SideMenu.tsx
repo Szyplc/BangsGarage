@@ -1,13 +1,13 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
-import { useStyles } from "../style";
+import { useStyles } from "../../style";
 import { useNavigate } from 'react-router-dom';
 import Heart from "./SideMenuComponents/Heart";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { CarToShowIndex, CarsToShow, LikesToShow, setCarByCar } from "../Store/carSlice";
+import { CarToShowIndex, CarsToShow, LikesToShow, setCarByCar } from "../../Store/carSlice";
 import axios from "axios";
-import { AppDispatch } from "../Store/store";
+import { AppDispatch } from "../../Store/store";
 
 const SideMenu = ({ indexMenu, isDoubleClick } : { indexMenu: number, isDoubleClick: boolean }) => {
   const classes = useStyles();

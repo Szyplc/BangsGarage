@@ -6,13 +6,10 @@ import "./App.css"
 import Slajder from "./Components/Slajder/Slajder";
 import Profile from "./Components/Profile/Profile";
 import Menu from "./Components/Menu/Menu";
-import Messages from "./Components/Communication/Messages/Messages";
-import Requests from "./Components/Communication/Requests/Request";
-import Chat from "./Components/Communication/Chat";
 import Configuration from "./Components/Profile/Configuration/Configuration";
 import CarCreator from "./Components/Car/CarCreator";
-import UserCar from "./Components/Car/UserCar";
-import CarGallery from "./Components/CarGallery/CarGallery";
+import UserCar from "./Components/Car/CarCollection";
+import CarGallery from "./Components/Car/CarGallery";
 import { User, getIdTokenResult, onAuthStateChanged } from "firebase/auth";
 import { auth } from "./base";
 import { useDispatch, useSelector } from "react-redux";
@@ -68,10 +65,7 @@ const App: React.FC = () => {
                 {isAuthenticated && 
                   <>
                     <Route path="/slajder" element={<Slajder />} />
-                    <Route path="/messages" element={<Messages />} />
                     <Route path="/liked_cars" element={<Profile />} />
-                    <Route path="/requests" element={<Requests />} />
-                    <Route path="/chat" element={<Chat />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/configuration" element={<Configuration />} />
                     <Route path="/carConfig" element={<CarCreator />} />

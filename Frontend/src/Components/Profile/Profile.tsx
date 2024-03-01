@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import UserCar from "../Car/UserCar";
+import UserCar from "../Car/CarCollection";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch } from "../../Store/store";
 import { CarsData, getLikedCars, loadCarsData, setCarById } from "../../Store/carSlice";

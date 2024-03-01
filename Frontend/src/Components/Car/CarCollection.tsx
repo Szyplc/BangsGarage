@@ -1,4 +1,4 @@
-import "./UserCar.css"
+import "./CarCollection.css"
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { CarsData, LikedCars, setCarById } from "../../Store/carSlice";
@@ -6,7 +6,7 @@ import { AppDispatch } from "../../Store/store";
 import { CarData } from "../../../../types/types";
 import { CurrentTheme } from "../../Store/themeSlice";
 
-const UserCar = ({ type }: { type: string }) => {
+const CarCollection = ({ type }: { type: string }) => {
     const dispatch = useDispatch<AppDispatch>();
     const currentTheme = useSelector(CurrentTheme)
     let cars: CarData[] = [];
@@ -38,4 +38,4 @@ const UserCar = ({ type }: { type: string }) => {
     );
 };
 
-export default UserCar;
+export default CarCollection;

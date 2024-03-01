@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { Media } from "../../../../types/types";
+import { Media } from "../../../../../types/types";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, EffectFade } from "swiper/modules"
+import SideMenu from "../../SideMenu/SideMenu";
+import { useSelector } from "react-redux";
+import { CurrentTheme } from "../../../Store/themeSlice";
 import "swiper/css"
 import "swiper/css/navigation"
 import "swiper/css/pagination"
 import "swiper/css/effect-fade"
-import SideMenu from "../../SideMenu/SideMenu";
-import { useSelector } from "react-redux";
-import { CurrentTheme } from "../../Store/themeSlice";
-import "./../Slajder/Slajder.css"
+import "./../../Slajder/Slajder.css"
 
 const SwiperWithMedia = ({ mediaProp, index }: { mediaProp: Media[], index: number }) => {
     const [media] = useState<Media[]>(mediaProp)
