@@ -22,6 +22,8 @@ dist/
 node_modules/
 .firebase/
 databaseScript.js
+.firebase/
+functions/
 # Pliki środowiskowe
 #.env
 #.env.local
