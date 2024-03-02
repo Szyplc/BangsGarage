@@ -70,7 +70,7 @@ const PhotoEdit: React.FC<PhotoEditProps> = ({
   };
 
   const update_photo = () => {
-    // fetch("145.239.93.11:3000/edit_photo_in_gallery", {
+    // fetch("http://145.239.93.11:3000/edit_photo_in_gallery", {
     //       method: "PUT",
     //       headers: {
     //         "Content-Type": "application/json",
@@ -80,7 +80,7 @@ const PhotoEdit: React.FC<PhotoEditProps> = ({
     //     })
     //       .then((response) => response.json())
     axios
-      .put("145.239.93.11:3000/edit_photo_in_gallery", photo, {
+      .put("http://145.239.93.11:3000/edit_photo_in_gallery", photo, {
         headers: {
           "Content-Type": "application/json",
           authorization: JSON.stringify(user),

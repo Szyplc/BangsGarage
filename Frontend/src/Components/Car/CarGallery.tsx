@@ -65,7 +65,7 @@ const CarGallery = () => {
             const fileRef = storageRef.child(name);
             await fileRef.put(file)
             //const url = await fileRef.getDownloadURL()
-            await axios.put("145.239.93.11:3000/updateCarMedia", { image: name, carId: car._id, profile: false }, {
+            await axios.put("http://145.239.93.11:3000/updateCarMedia", { image: name, carId: car._id, profile: false }, {
                 headers: {
                 "Content-Type": "application/json",
                 }
@@ -88,7 +88,7 @@ const CarGallery = () => {
 
     const deleteButton = async () => {
         if (car && car.media && currentIndex >= 0 && currentIndex < car.media.length) {
-            await axios.delete("145.239.93.11:3000/delete_photo", { data: { _id: car?.media[currentIndex]._id } })
+            await axios.delete("http://145.239.93.11:3000/delete_photo", { data: { _id: car?.media[currentIndex]._id } })
             let newCar = { ...car } as CarData
             newCar.media = newCar.media.filter((_, index) => index !== currentIndex);
             const updatedCar = { ...newCar, 

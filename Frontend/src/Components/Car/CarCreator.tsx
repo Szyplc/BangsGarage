@@ -34,7 +34,7 @@ function CarCreator() {
     useEffect(() => {
       if(!car)
       {
-        axios.post("145.239.93.11:3000/create_car", {
+        axios.post("http://145.239.93.11:3000/create_car", {
             headers: {
               "Content-Type": "application/json",
             }
@@ -58,7 +58,7 @@ function CarCreator() {
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        await axios.put("145.239.93.11:3000/update_car", {...carData, carId: carId }, {
+        await axios.put("http://145.239.93.11:3000/update_car", {...carData, carId: carId }, {
           headers: {
             "Content-Type": "application/json",
           }
@@ -75,7 +75,7 @@ function CarCreator() {
     }
 
     const deleteCar = async () => {
-      axios.delete("145.239.93.11:3000/delete_car", { data: { _id: carId } })
+      axios.delete("http://145.239.93.11:3000/delete_car", { data: { _id: carId } })
       dispatch(loadCarsData())
       navigate("/profile")
     }
