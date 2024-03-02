@@ -32,8 +32,8 @@ const AddPhotoToProfileGallery = () => {
     const deleteOldProfileImage = async () => {
       /*const oldProfileImgId = car?.media.find(media => media.profile === true)?._id
       if(oldProfileImgId)
-        await axios.delete("http://127.0.0.1:3000/delete_car_media", { data: { _id: oldProfileImgId, _car_id: car?._id }})*/
-      await axios.delete("http://127.0.0.1:3000/delete_car_media", { data: { _car_id: car?._id }})
+        await axios.delete("145.239.93.11:3000/delete_car_media", { data: { _id: oldProfileImgId, _car_id: car?._id }})*/
+      await axios.delete("145.239.93.11:3000/delete_car_media", { data: { _car_id: car?._id }})
     }
 
     const sendPhotoToFirebase = async (currentFile: File): Promise<string> => {
@@ -59,7 +59,7 @@ const AddPhotoToProfileGallery = () => {
         carId: car?._id
       };
 
-      await axios.post("http://127.0.0.1:3000/post_photo_to_gallery", postData, {
+      await axios.post("145.239.93.11:3000/post_photo_to_gallery", postData, {
         headers: {
           "Content-Type": "application/json",
         }

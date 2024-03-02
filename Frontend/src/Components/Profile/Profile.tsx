@@ -28,7 +28,7 @@ const Profile = () => {
 
   useEffect(() => {
     axios
-      .get("http://127.0.0.1:3000/user", {
+      .get("145.239.93.11:3000/user", {
         headers: {
           "Content-Type": "application/json",
         },

@@ -36,7 +36,7 @@ function Configuration() {
 
   useEffect(() => {
     axios
-      .get("http://127.0.0.1:3000/user", {
+      .get("145.239.93.11:3000/user", {
         headers: {
           "Content-Type": "application/json",
         },
@@ -58,7 +58,7 @@ function Configuration() {
         console.error("Wystąpił błąd:", error);
       });
 
-      axios.get("http://127.0.0.1:3000/profile_image", {
+      axios.get("145.239.93.11:3000/profile_image", {
         headers: {
           "Content-Type": "application/json",
         }}).then((res: AxiosResponse) => {
@@ -127,7 +127,7 @@ function Configuration() {
       url_photo_image: userPhoto,
     };
     axios
-      .post("http://127.0.0.1:3000/update_profile", user_database, {
+      .post("145.239.93.11:3000/update_profile", user_database, {
         headers: {
           "Content-Type": "application/json",
         },

@@ -38,7 +38,7 @@ const SideMenu = ({ indexMenu, isDoubleClick } : { indexMenu: number, isDoubleCl
   const handleHeartClick = async () => {
     toggleHeartColor()
     const _id_car = carsToShow[index]._id
-    await axios.post("http://127.0.0.1:3000/toggle_like_to_car", { carId: _id_car })
+    await axios.post("145.239.93.11:3000/toggle_like_to_car", { carId: _id_car })
   };
 
   useEffect(() => {

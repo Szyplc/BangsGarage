@@ -27,7 +27,7 @@ const initialState: CarState = {
 export const getLikedCars = createAsyncThunk<CarData[]>(
   "car/getLikedCars",
   async () => {
-    const arrayLikedCars: string[] = (await axios.get("http://127.0.0.1:3000/get_liked_cars")).data
+    const arrayLikedCars: string[] = (await axios.get("145.239.93.11:3000/get_liked_cars")).data
     const likedCars: CarData[] = await loadCarsDataFunction(arrayLikedCars)
     return likedCars
   }
@@ -35,7 +35,7 @@ export const getLikedCars = createAsyncThunk<CarData[]>(
 
 
 const getCarToShowFunction = async (index: number): Promise<{ car: CarData, isLike: boolean } | null> => {
-  const newCar = await (await axios.get("http://127.0.0.1:3000/getCarToSlider", { params: { index: index }})).data as CarData | null
+  const newCar = await (await axios.get("145.239.93.11:3000/getCarToSlider", { params: { index: index }})).data as CarData | null
   if(newCar) {
     for(const [index, media] of newCar.media.entries()) {
         const fullUrl = await convertUrlToFullUrl(media.url)
@@ -43,7 +43,7 @@ const getCarToShowFunction = async (index: number): Promise<{ car: CarData, isLi
     }
     const carProfileFullUrl = newCar.media.find(obj => obj.profile === true)?.url
     newCar.profileUrl = carProfileFullUrl ? await convertUrlToFullUrl(carProfileFullUrl) : "";
-    let isLike = (await axios.get("http://127.0.0.1:3000/check_if_user_like_car", 
+    let isLike = (await axios.get("145.239.93.11:3000/check_if_user_like_car", 
       { params: { carId: newCar._id }})).data
     if(typeof isLike != 'boolean')
       isLike = false
@@ -70,7 +70,7 @@ export const getCarsId = createAsyncThunk<string[]>(
   'car/getCarsId',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get<string[]>("http://127.0.0.1:3000/getUserCars");
+      const response = await axios.get<string[]>("145.239.93.11:3000/getUserCars");
       return response.data;
     } catch (error) {
       return rejectWithValue([]);
@@ -83,7 +83,7 @@ export const getCarData = createAsyncThunk<CarData | null, string>(
   'car/getCarData',
   async (car_id, { rejectWithValue }) => {
     try {
-      const response = await axios.get<CarData>(`http://127.0.0.1:3000/getCarData`, {
+      const response = await axios.get<CarData>(`145.239.93.11:3000/getCarData`, {
         params: { car_id },
       });
       return response.data;
@@ -96,7 +96,7 @@ export const getCarData = createAsyncThunk<CarData | null, string>(
 const loadCarsDataFunction = async (cars_id: string[]): Promise<CarData[]> => {
   const carsDataPromises = cars_id.map(async (car_id) => {
     try {
-      const response = await axios.get<CarData>(`http://127.0.0.1:3000/getCarData`, {
+      const response = await axios.get<CarData>(`145.239.93.11:3000/getCarData`, {
         params: { car_id }
       });
       const carData = response.data as CarData | undefined;
