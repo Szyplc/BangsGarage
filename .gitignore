@@ -17,13 +17,12 @@ node_modules/
 /build
 /out
 
-Functions/
-dist/
-node_modules/
-.firebase/
+**/Functions
+**/dist
+**/node_modules
+**/.firebase
 databaseScript.js
-.firebase/
-functions/
+**/functions
 # Pliki środowiskowe
 #.env
 #.env.local
