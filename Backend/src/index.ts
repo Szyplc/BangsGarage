@@ -115,7 +115,7 @@ app.post('/register', async (req, res) => {
     username: req.body.username,
     email: req.body.userCredential.user.email,
     uid: req.body.userCredential.user.uid,
-    localization: req.body.localization
+    localization: req.body?.localization
   };
   // Tworzenie nowego użytkownika
   const newUser = new User(userData);
@@ -522,7 +522,7 @@ app.get("/getCarToSlider", async (req, res) => {
     //user localization
     const userToken = req.decodedToken
     const user = await User.findOne({ uid: userToken?.user_id })
-    const [userLat, userLon] = user.localization
+    const [userLat, userLon] = user.localization ? user.localization : [0, 0]
 
     for(const car of cars) {
       //oblicanie ile to polubienia
@@ -536,7 +536,7 @@ app.get("/getCarToSlider", async (req, res) => {
       if(car_owner_id == user._id)
         continue
       const currentUser = await User.findById(car_owner_id)
-      const [currentUserLat, currentUserLon] = currentUser.localization
+      const [currentUserLat, currentUserLon] = currentUser?.localization ? currentUser.localization : [0, 0]
       //obliczanie jak daleko
       let distance = calculateDistance(userLat, userLon,  currentUserLat, currentUserLon) + 1;
       const radius = 500; // promień w którym szukamy aut
